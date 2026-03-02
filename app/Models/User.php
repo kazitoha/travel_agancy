@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Companies;
+use App\Traits\CompanyScoped;
 use App\Traits\LogsActivity;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -23,7 +24,7 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'companies_id',
+        'company_id',
         'name',
         'email',
         'password',
@@ -62,7 +63,7 @@ class User extends Authenticatable
 
     public function company(): BelongsTo
     {
-        return $this->belongsTo(Companies::class, 'companies_id');
+        return $this->belongsTo(Companies::class, 'company_id');
     }
 
     public function accounts(): HasMany

@@ -15,7 +15,6 @@ return new class extends Migration
     {
         Schema::create('customers', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Companies::class, 'companies_id')->constrained('companies')->cascadeOnDelete();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->string('passport_number', 100);
             $table->string('name');
@@ -24,9 +23,9 @@ return new class extends Migration
             $table->date('date_of_birth');
             $table->text('address');
             $table->timestamps();
+            $table->foreignIdFor(Companies::class, 'company_id')->constrained('companies')->cascadeOnDelete();
 
-            $table->unique(['companies_id', 'passport_number']);
-            $table->index(['companies_id', 'name']);
+            $table->unique(['company_id', 'passport_number']);
         });
     }
 

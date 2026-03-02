@@ -16,7 +16,7 @@ class CustomerController extends Controller
         $authUser = $request->user();
 
         $customers = Customers::query()
-            ->where('companies_id', $authUser->companies_id)
+            ->where('company_id', $authUser->company_id)
             ->latest()
             ->get();
 
@@ -34,7 +34,7 @@ class CustomerController extends Controller
                 'required',
                 'string',
                 'max:100',
-                Rule::unique('customers', 'passport_number')->where(fn($query) => $query->where('companies_id', $authUser->companies_id)),
+                Rule::unique('customers', 'passport_number')->where(fn($query) => $query->where('company_id', $authUser->company_id)),
             ],
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
@@ -44,7 +44,7 @@ class CustomerController extends Controller
         ]);
 
         Customers::create([
-            'companies_id' => $authUser->companies_id,
+            'company_id' => $authUser->company_id,
             'user_id' => $authUser->id,
             'passport_number' => $validated['passport_number'],
             'name' => $validated['name'],
@@ -78,7 +78,7 @@ class CustomerController extends Controller
                 'string',
                 'max:100',
                 Rule::unique('customers', 'passport_number')
-                    ->where(fn($query) => $query->where('companies_id', $request->user()->companies_id))
+                    ->where(fn($query) => $query->where('company_id', $request->user()->company_id))
                     ->ignore($customer->id),
             ],
             'name' => ['required', 'string', 'max:255'],
@@ -109,7 +109,7 @@ class CustomerController extends Controller
     {
         return Customers::query()
             ->where('id', $customerId)
-            ->where('companies_id', $request->user()->companies_id)
+            ->where('company_id', $request->user()->company_id)
             ->firstOrFail();
     }
 }

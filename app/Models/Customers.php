@@ -2,18 +2,19 @@
 
 namespace App\Models;
 
+use App\Traits\CompanyScoped;
 use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Customers extends Model
 {
-    use LogsActivity;
+    use LogsActivity, CompanyScoped;
 
     protected $table = 'customers';
 
     protected $fillable = [
-        'companies_id',
+        'company_id',
         'user_id',
         'passport_number',
         'name',
@@ -32,7 +33,7 @@ class Customers extends Model
 
     public function company(): BelongsTo
     {
-        return $this->belongsTo(Companies::class, 'companies_id');
+        return $this->belongsTo(Companies::class, 'company_id');
     }
 
     public function user(): BelongsTo

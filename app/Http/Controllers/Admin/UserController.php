@@ -18,7 +18,7 @@ class UserController extends Controller
         $authUser = $request->user();
 
         $users = User::query()
-            ->where('companies_id', $authUser->companies_id)
+            ->where('company_id', $authUser->company_id)
             ->whereDoesntHave('roles', fn($query) => $query->where('name', 'admin'))
             ->latest()
             ->get();
@@ -41,7 +41,7 @@ class UserController extends Controller
 
         DB::transaction(function () use ($validated, $authUser) {
             $user = User::create([
-                'companies_id' => $authUser->companies_id,
+                'company_id' => $authUser->company_id,
                 'name' => $validated['name'],
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),
@@ -107,7 +107,7 @@ class UserController extends Controller
     {
         return User::query()
             ->where('id', $userId)
-            ->where('companies_id', $request->user()->companies_id)
+            ->where('company_id', $request->user()->company_id)
             ->whereDoesntHave('roles', fn($query) => $query->where('name', 'admin'))
             ->firstOrFail();
     }

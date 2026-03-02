@@ -39,7 +39,7 @@ class RoleSeeder extends Seeder
         $admin = User::updateOrCreate(
             ['email' => 'admin@mail.com'],
             [
-                'companies_id' => $company->id,
+                'company_id' => $company->id,
                 'name' => 'admin',
                 'email_verified_at' => now(),
                 'password' => Hash::make('12345678'),

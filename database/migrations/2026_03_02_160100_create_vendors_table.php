@@ -15,15 +15,16 @@ return new class extends Migration
     {
         Schema::create('vendors', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Companies::class, 'companies_id')->constrained('companies')->cascadeOnDelete();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->string('name');
             $table->string('email');
             $table->string('mobile', 30);
             $table->text('address');
             $table->timestamps();
+            $table->foreignIdFor(Companies::class, 'company_id')->constrained('companies')->cascadeOnDelete();
 
-            $table->index(['companies_id', 'name']);
+
+            $table->index(['company_id', 'name']);
         });
     }
 

@@ -42,6 +42,20 @@
             'patterns' => ['customers.*'],
             'icon_theme' => 'emerald',
         ],
+        [
+            'label' => 'Ticket Purchases',
+            'icon' => 'receipt',
+            'route' => 'ticket_purchases.index',
+            'patterns' => ['ticket_purchases.*'],
+            'icon_theme' => 'orange',
+        ],
+        [
+            'label' => 'Ticket Sales',
+            'icon' => 'receipt',
+            'route' => 'ticket_sales.index',
+            'patterns' => ['ticket_sales.*'],
+            'icon_theme' => 'emerald',
+        ],
     ];
 @endphp
 

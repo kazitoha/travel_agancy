@@ -26,15 +26,19 @@ class AuthController extends Controller
         $ip  = $request->ip();
         $key = 'login_fail_ip:' . $ip;
 
-        $isBlocked = BlockIP::query()
-            ->where('ip_address', $ip)
-            ->whereNotNull('blocked_at')
-            ->exists();
-        if ($isBlocked) {
-            throw ValidationException::withMessages([
-                'email' => 'This IP address is blocked. Please contact support.',
-            ]);
+        if (!env('APP_DEBUG', true)) {
+            $isBlocked = BlockIP::query()
+                ->where('ip_address', $ip)
+                ->whereNotNull('blocked_at')
+                ->exists();
+
+            if ($isBlocked) {
+                throw ValidationException::withMessages([
+                    'email' => 'This IP address is blocked. Please contact support.',
+                ]);
+            }
         }
+
 
         $credentials = $request->validate([
             'email' => 'required|email',
@@ -44,17 +48,21 @@ class AuthController extends Controller
         $remember = $request->boolean('remember');
 
 
+
         // check auth based on mail and role guard
 
         if (Auth::guard('web')->attempt($credentials, $remember)) {
             $request->session()->regenerate();
-            RateLimiter::clear($key); // reset failed attempts on success
+            RateLimiter::clear($key);
+            $user = Auth::guard('web')->user();
+            $request->session()->put('company_id', $user->company_id);
 
             return redirect()->intended(route('dashboard'));
         }
 
 
         if (Auth::guard('superadmin')->attempt($credentials, $remember)) {
+
 
             $request->session()->regenerate();
             RateLimiter::clear($key); // reset failed attempts on success
@@ -63,20 +71,21 @@ class AuthController extends Controller
         }
 
 
-        // failed login: count attempts for 10 minutes
-        RateLimiter::hit($key, 600); // 600 seconds = 10 minutes
+        if (!env('APP_DEBUG', true)) {
+            // failed login: count attempts for 10 minutes
+            RateLimiter::hit($key, 600); // 600 seconds = 10 minutes
 
-        // if 3 or more fails within 10 minutes, store IP
-        if (RateLimiter::attempts($key) >= 3) {
-            BlockIP::updateOrCreate(
-                ['ip_address' => $ip],
-                [
-                    'blocked_at' => now(),
-                    'reason' => '3 failed login attempts within 10 minutes',
-                ]
-            );
+            // if 3 or more fails within 10 minutes, store IP
+            if (RateLimiter::attempts($key) >= 3) {
+                BlockIP::updateOrCreate(
+                    ['ip_address' => $ip],
+                    [
+                        'blocked_at' => now(),
+                        'reason' => '3 failed login attempts within 10 minutes',
+                    ]
+                );
+            }
         }
-
         throw ValidationException::withMessages([
             'email' => __('auth.failed'),
         ]);

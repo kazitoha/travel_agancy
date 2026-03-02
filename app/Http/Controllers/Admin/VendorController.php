@@ -15,7 +15,7 @@ class VendorController extends Controller
         $authUser = $request->user();
 
         $vendors = Vendors::query()
-            ->where('companies_id', $authUser->companies_id)
+            ->where('company_id', $authUser->company_id)
             ->latest()
             ->get();
 
@@ -36,7 +36,7 @@ class VendorController extends Controller
         ]);
 
         Vendors::create([
-            'companies_id' => $authUser->companies_id,
+            'company_id' => $authUser->company_id,
             'user_id' => $authUser->id,
             'name' => $validated['name'],
             'email' => $validated['email'],
@@ -90,7 +90,7 @@ class VendorController extends Controller
     {
         return Vendors::query()
             ->where('id', $vendorId)
-            ->where('companies_id', $request->user()->companies_id)
+            ->where('company_id', $request->user()->company_id)
             ->firstOrFail();
     }
 }

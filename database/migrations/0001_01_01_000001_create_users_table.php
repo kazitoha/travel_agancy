@@ -14,7 +14,8 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Companies::class, 'companies_id')->constrained('companies')->cascadeOnDelete();
+            $table->foreignIdFor(Companies::class, 'company_id')->constrained('companies')->cascadeOnDelete();
+
             $table->string('name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();

@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Companies;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -26,6 +27,7 @@ return new class extends Migration
             $table->enum('status', ['active', 'inactive'])->default('active');
 
             $table->timestamps();
+            $table->foreignIdFor(Companies::class, 'company_id')->nullable()->constrained()->nullOnDelete();
 
             $table->index(['user_id', 'status']);
         });

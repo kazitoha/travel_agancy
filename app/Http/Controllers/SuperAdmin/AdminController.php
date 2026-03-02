@@ -45,7 +45,7 @@ class AdminController extends Controller
             ]);
 
             $user = User::create([
-                'companies_id' => $company->id,
+                'company_id' => $company->id,
                 'name' => $validated['name'],
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),

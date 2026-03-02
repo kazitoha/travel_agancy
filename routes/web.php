@@ -6,6 +6,8 @@ use App\Http\Controllers\Admin\ExpenseController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\TicketPurchaseController;
+use App\Http\Controllers\Admin\TicketSaleController;
 use App\Http\Controllers\Admin\VendorController;
 use App\Http\Controllers\SuperAdmin\AdminController as SuperAdminAdminController;
 use Illuminate\Support\Facades\Route;
@@ -69,6 +71,20 @@ Route::middleware(['auth', 'ensure.permission'])->group(function () {
     Route::get('/customers/{customer}/edit', [CustomerController::class, 'edit'])->name('customers.edit');
     Route::put('/customers/{customer}', [CustomerController::class, 'update'])->name('customers.update');
     Route::delete('/customers/{customer}', [CustomerController::class, 'destroy'])->name('customers.destroy');
+
+    Route::get('/ticket-purchases', [TicketPurchaseController::class, 'index'])->name('ticket_purchases.index');
+    Route::get('/ticket-purchases/create', [TicketPurchaseController::class, 'create'])->name('ticket_purchases.create');
+    Route::post('/ticket-purchases', [TicketPurchaseController::class, 'store'])->name('ticket_purchases.store');
+    Route::get('/ticket-purchases/{ticketPurchase}/edit', [TicketPurchaseController::class, 'edit'])->name('ticket_purchases.edit');
+    Route::put('/ticket-purchases/{ticketPurchase}', [TicketPurchaseController::class, 'update'])->name('ticket_purchases.update');
+    Route::delete('/ticket-purchases/{ticketPurchase}', [TicketPurchaseController::class, 'destroy'])->name('ticket_purchases.destroy');
+
+    Route::get('/ticket-sales', [TicketSaleController::class, 'index'])->name('ticket_sales.index');
+    Route::get('/ticket-sales/create', [TicketSaleController::class, 'create'])->name('ticket_sales.create');
+    Route::post('/ticket-sales', [TicketSaleController::class, 'store'])->name('ticket_sales.store');
+    Route::get('/ticket-sales/{ticketSale}/edit', [TicketSaleController::class, 'edit'])->name('ticket_sales.edit');
+    Route::put('/ticket-sales/{ticketSale}', [TicketSaleController::class, 'update'])->name('ticket_sales.update');
+    Route::delete('/ticket-sales/{ticketSale}', [TicketSaleController::class, 'destroy'])->name('ticket_sales.destroy');
 
     Route::get('/admin/users', [UserController::class, 'index'])->name('admin.users.index');
     Route::post('/admin/users', [UserController::class, 'store'])->name('admin.users.store');
