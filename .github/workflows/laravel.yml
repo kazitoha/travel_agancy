@@ -1,0 +1,48 @@
+name: Laravel Simple FTP Deploy (As Pushed)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # Allows manual triggering from the GitHub UI
+
+env:
+  PHP_VERSION: "8.2" # Keeping for context, but not used
+
+jobs:
+  ftp-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # --- DEPLOYMENT ---
+      # This step only syncs the files present in the checked out repository.
+      - name: FTP Deploy (Direct Sync)
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./
+          server-dir: /agency.taskshaper.xyz/
+          dry-run: false
+          log-level: verbose
+          # IMPORTANT: Keeping essential exclusions like .env, storage, and vendor
+          # since they should be managed server-side.
+          exclude: |
+            .git*
+            .github/*
+            .ftp-deploy-sync-state.json
+            node_modules/*
+            tests/*
+            .env
+            storage/
+            vendor/
+            *.sqlite
+            public/build/.vite 
+            public/hot
+
+      - name: Post-deploy note
+        run: echo "Deployment complete. Code pushed has been synced directly without any build steps."
