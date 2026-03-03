@@ -12,12 +12,7 @@ class VendorController extends Controller
 {
     public function index(Request $request): View
     {
-        $authUser = $request->user();
-
-        $vendors = Vendors::query()
-            ->where('company_id', $authUser->company_id)
-            ->latest()
-            ->get();
+        $vendors = Vendors::latest()->get();
 
         return view('admin.vendors.index', [
             'vendors' => $vendors,
@@ -26,8 +21,6 @@ class VendorController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $authUser = $request->user();
-
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
@@ -35,14 +28,7 @@ class VendorController extends Controller
             'address' => ['required', 'string', 'max:2000'],
         ]);
 
-        Vendors::create([
-            'company_id' => $authUser->company_id,
-            'user_id' => $authUser->id,
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'mobile' => $validated['mobile'],
-            'address' => $validated['address'],
-        ]);
+        Vendors::create($validated);
 
         return redirect()
             ->route('vendors.index')
@@ -51,7 +37,7 @@ class VendorController extends Controller
 
     public function edit(Request $request, int $vendor): View
     {
-        $vendor = $this->ownedVendor($request, $vendor);
+        $vendor = Vendors::findOrFail($vendor);
 
         return view('admin.vendors.edit', [
             'vendor' => $vendor,
@@ -60,7 +46,7 @@ class VendorController extends Controller
 
     public function update(Request $request, int $vendor): RedirectResponse
     {
-        $vendor = $this->ownedVendor($request, $vendor);
+        $vendor = Vendors::findOrFail($vendor);
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -78,19 +64,11 @@ class VendorController extends Controller
 
     public function destroy(Request $request, int $vendor): RedirectResponse
     {
-        $vendor = $this->ownedVendor($request, $vendor);
+        $vendor = Vendors::findOrFail($vendor);
         $vendor->delete();
 
         return redirect()
             ->route('vendors.index')
             ->with('success', 'Vendor deleted successfully.');
-    }
-
-    private function ownedVendor(Request $request, int $vendorId): Vendors
-    {
-        return Vendors::query()
-            ->where('id', $vendorId)
-            ->where('company_id', $request->user()->company_id)
-            ->firstOrFail();
     }
 }

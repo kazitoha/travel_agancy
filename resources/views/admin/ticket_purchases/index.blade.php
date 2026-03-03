@@ -105,11 +105,7 @@
                             class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4">
                     </div>
 
-                    <div>
-                        <label class="text-sm font-semibold text-slate-700">Due</label>
-                        <input type="number" name="due_amount" step="0.01" min="0" value="{{ old('due_amount', 0) }}"
-                            class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4">
-                    </div>
+                 
 
                     <div>
                         <label class="text-sm font-semibold text-slate-700">Issue date</label>
@@ -185,8 +181,13 @@
                                             {{ $ticket->notes ?: '—' }}
                                         </td>
                                         <td class="px-4 py-3">
+                                           
                                             <div class="flex items-center justify-end gap-2">
-                                                <a href="{{ route('ticket_purchases.edit', $ticket->id) }}"
+                                                <a href="{{ route('ticket_purchases.payment_history', $ticket->id) }}"
+                                                    class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+                                                    Payment History
+                                                </a>
+                                                 <a href="{{ route('ticket_purchases.edit', $ticket->id) }}"
                                                     class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">
                                                     Edit
                                                 </a>

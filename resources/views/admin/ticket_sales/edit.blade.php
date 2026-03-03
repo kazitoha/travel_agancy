@@ -92,13 +92,7 @@
                         class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4">
                 </div>
 
-                <div>
-                    <label class="text-sm font-semibold text-slate-700">Due</label>
-                    <input type="number" name="due" step="0.01" min="0"
-                        value="{{ old('due', $ticketSale->due) }}"
-                        class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4">
-                </div>
-
+            
                 <div>
                     <label class="text-sm font-semibold text-slate-700">Issue date</label>
                     <input type="date" name="issue_date"

@@ -72,6 +72,8 @@ Route::middleware(['auth', 'ensure.permission'])->group(function () {
     Route::put('/customers/{customer}', [CustomerController::class, 'update'])->name('customers.update');
     Route::delete('/customers/{customer}', [CustomerController::class, 'destroy'])->name('customers.destroy');
 
+
+
     Route::get('/ticket-purchases', [TicketPurchaseController::class, 'index'])->name('ticket_purchases.index');
     Route::get('/ticket-purchases/create', [TicketPurchaseController::class, 'create'])->name('ticket_purchases.create');
     Route::post('/ticket-purchases', [TicketPurchaseController::class, 'store'])->name('ticket_purchases.store');
@@ -79,12 +81,49 @@ Route::middleware(['auth', 'ensure.permission'])->group(function () {
     Route::put('/ticket-purchases/{ticketPurchase}', [TicketPurchaseController::class, 'update'])->name('ticket_purchases.update');
     Route::delete('/ticket-purchases/{ticketPurchase}', [TicketPurchaseController::class, 'destroy'])->name('ticket_purchases.destroy');
 
+    Route::get('/ticket-purchases/{ticketPurchase}/payment-history', [TicketPurchaseController::class, 'paymentHistory'])
+        ->name('ticket_purchases.payment_history');
+
+    Route::post('/ticket-purchases/{ticketPurchase}/add-payment', [TicketPurchaseController::class, 'addPayment'])
+        ->name('ticket_purchases.add_payment');
+
+    // History edit
+    Route::get('/ticket-purchases/payment-history/{history}/edit', [TicketPurchaseController::class, 'editPaymentHistory'])
+        ->name('ticket_purchases.payment_history.edit');
+
+    Route::put('/ticket-purchases/payment-history/{history}', [TicketPurchaseController::class, 'updatePaymentHistory'])
+        ->name('ticket_purchases.payment_history.update');
+
+
+
+
+
     Route::get('/ticket-sales', [TicketSaleController::class, 'index'])->name('ticket_sales.index');
     Route::get('/ticket-sales/create', [TicketSaleController::class, 'create'])->name('ticket_sales.create');
     Route::post('/ticket-sales', [TicketSaleController::class, 'store'])->name('ticket_sales.store');
     Route::get('/ticket-sales/{ticketSale}/edit', [TicketSaleController::class, 'edit'])->name('ticket_sales.edit');
     Route::put('/ticket-sales/{ticketSale}', [TicketSaleController::class, 'update'])->name('ticket_sales.update');
     Route::delete('/ticket-sales/{ticketSale}', [TicketSaleController::class, 'destroy'])->name('ticket_sales.destroy');
+
+    Route::get('/ticket-sales/{ticketSale}/payment-history', [TicketSaleController::class, 'paymentHistory'])
+        ->name('ticket_sales.payment_history');
+
+    Route::get('/ticket-sales/{ticketSale}/payment-history/add', [TicketSaleController::class, 'addPaymentForm'])
+        ->name('ticket_sales.payment_history.add');
+
+    Route::post('/ticket-sales/{ticketSale}/payment-history', [TicketSaleController::class, 'storePaymentHistory'])
+        ->name('ticket_sales.payment_history.store');
+    Route::get('/ticket-sales/{ticketSale}/payment-history', [TicketSaleController::class, 'paymentHistory'])->name('ticket_sales.payment_history');
+    Route::get('/ticket-sales/{ticketSale}/payment-history', [TicketSaleController::class, 'paymentHistory'])
+        ->name('ticket_sales.payment_history');
+    Route::get('/ticket-sales/{ticketSale}/payment-history/{history}/edit', [TicketSaleController::class, 'editPaymentHistory'])
+        ->name('ticket_sales.payment_history.edit');
+    Route::put('/ticket-sales/{ticketSale}/payment-history/{history}', [TicketSaleController::class, 'updatePaymentHistory'])
+        ->name('ticket_sales.payment_history.update');
+
+
+
+
 
     Route::get('/admin/users', [UserController::class, 'index'])->name('admin.users.index');
     Route::post('/admin/users', [UserController::class, 'store'])->name('admin.users.store');

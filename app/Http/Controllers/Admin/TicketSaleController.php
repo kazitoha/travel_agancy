@@ -7,9 +7,10 @@ use App\Models\Accounts;
 use App\Models\Customers;
 use App\Models\TicketPurchases;
 use App\Models\TicketSales;
+use App\Models\TicketSalesPaymentHistory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -17,32 +18,24 @@ class TicketSaleController extends Controller
 {
     public function index(Request $request): View
     {
-        $companyId = $request->user()->company_id;
+        $customers = Customers::orderBy('name')->get();
 
-        $customers = Customers::query()
-            ->where($this->companyColumn('customers'), $companyId)
+        $accounts = Accounts::where('status', 'active')
             ->orderBy('name')
             ->get();
 
-        $accounts = Accounts::query()
-            ->where($this->companyColumn('accounts'), $companyId)
-            ->where('status', 'active')
-            ->orderBy('name')
-            ->get();
-
-        $purchases = TicketPurchases::query()
-            ->where($this->companyColumn('ticket_purchases'), $companyId)
-            ->with(['vendor:id,name', 'customer:id,name'])
+        $purchases = TicketPurchases::with([
+            'vendor:id,name',
+            'customer:id,name'
+        ])
             ->latest()
             ->get();
 
-        $ticketSales = TicketSales::query()
-            ->where($this->companyColumn('ticket_sales'), $companyId)
-            ->with([
-                'purchase:id,sector,carrier,flight_date',
-                'customer:id,name',
-                'account:id,name',
-            ])
+        $ticketSales = TicketSales::with([
+            'purchase:id,sector,carrier,flight_date',
+            'customer:id,name',
+            'account:id,name',
+        ])
             ->latest()
             ->get();
 
@@ -54,75 +47,69 @@ class TicketSaleController extends Controller
         ]);
     }
 
-    public function create(Request $request): RedirectResponse
+    public function create(): RedirectResponse
     {
         return redirect()->route('ticket_sales.index');
     }
 
     public function store(Request $request): RedirectResponse
     {
-        $companyId = $request->user()->company_id;
-        $customerCompanyColumn = $this->companyColumn('customers');
-        $accountCompanyColumn = $this->companyColumn('accounts');
-        $purchaseCompanyColumn = $this->companyColumn('ticket_purchases');
-
         $validated = $request->validate([
-            'purchase_id' => [
-                'nullable',
-                Rule::exists('ticket_purchases', 'id')
-                    ->where(fn($query) => $query->where($purchaseCompanyColumn, $companyId)),
-            ],
-            'customer_id' => [
-                'nullable',
-                Rule::exists('customers', 'id')
-                    ->where(fn($query) => $query->where($customerCompanyColumn, $companyId)),
-            ],
-            'account_id' => [
-                'nullable',
-                Rule::exists('accounts', 'id')
-                    ->where(fn($query) => $query->where($accountCompanyColumn, $companyId)),
-            ],
+            'purchase_id' => ['required', Rule::exists('ticket_purchases', 'id')],
+            'customer_id' => ['required', Rule::exists('customers', 'id')],
+            'account_id' => ['nullable', Rule::exists('accounts', 'id')],
             'sell_price' => ['required', 'numeric', 'min:0'],
             'paid' => ['nullable', 'numeric', 'min:0'],
-            'due' => ['nullable', 'numeric', 'min:0'],
             'issue_date' => ['nullable', 'date'],
         ]);
 
-        TicketSales::create([
-            'company_id' => $companyId,
-            'purchase_id' => $validated['purchase_id'] ?? null,
-            'customer_id' => $validated['customer_id'] ?? null,
-            'account_id' => $validated['account_id'] ?? null,
-            'sell_price' => $validated['sell_price'],
-            'paid' => $validated['paid'] ?? 0,
-            'due' => $validated['due'] ?? 0,
-            'issue_date' => $validated['issue_date'] ?? null,
-        ]);
+        $due = $validated['sell_price'] - ($validated['paid'] ?? 0);
+
+        DB::transaction(function () use ($validated, $due) {
+
+            Accounts::find($validated['account_id'])
+                ->increment('current_balance', $validated['paid'] ?? 0);
+
+            $ticketSale =  TicketSales::create([
+                'purchase_id' => $validated['purchase_id'] ?? null,
+                'customer_id' => $validated['customer_id'] ?? null,
+                'account_id' => $validated['account_id'] ?? null,
+                'sell_price' => $validated['sell_price'],
+                'paid' => $validated['paid'] ?? 0,
+                'due' => $due,
+                'issue_date' => $validated['issue_date'] ?? null,
+            ]);
+
+            TicketSalesPaymentHistory::create([
+                'ticket_sales_id' =>  $ticketSale->id,
+                'account_id' => $validated['account_id'] ?? null,
+                'paid' => $validated['paid'] ?? 0,
+                'due' => $due,
+            ]);
+
+            TicketPurchases::find($validated['purchase_id'])
+                ->update(['customer_id' => $validated['customer_id'] ?? null]);
+        });
 
         return redirect()
             ->route('ticket_sales.index')
             ->with('success', 'Ticket sale saved successfully.');
     }
 
-    public function edit(Request $request, int $ticketSale): View
+    public function edit(int $ticketSale): View
     {
-        $companyId = $request->user()->company_id;
-        $ticketSale = $this->ownedTicketSale($companyId, $ticketSale);
+        $ticketSale = TicketSales::findOrFail($ticketSale);
 
-        $customers = Customers::query()
-            ->where($this->companyColumn('customers'), $companyId)
+        $customers = Customers::orderBy('name')->get();
+
+        $accounts = Accounts::where('status', 'active')
             ->orderBy('name')
             ->get();
 
-        $accounts = Accounts::query()
-            ->where($this->companyColumn('accounts'), $companyId)
-            ->where('status', 'active')
-            ->orderBy('name')
-            ->get();
-
-        $purchases = TicketPurchases::query()
-            ->where($this->companyColumn('ticket_purchases'), $companyId)
-            ->with(['vendor:id,name', 'customer:id,name'])
+        $purchases = TicketPurchases::with([
+            'vendor:id,name',
+            'customer:id,name'
+        ])
             ->latest()
             ->get();
 
@@ -136,70 +123,278 @@ class TicketSaleController extends Controller
 
     public function update(Request $request, int $ticketSale): RedirectResponse
     {
-        $companyId = $request->user()->company_id;
-        $ticketSale = $this->ownedTicketSale($companyId, $ticketSale);
-        $customerCompanyColumn = $this->companyColumn('customers');
-        $accountCompanyColumn = $this->companyColumn('accounts');
-        $purchaseCompanyColumn = $this->companyColumn('ticket_purchases');
+        $ticketSale = TicketSales::findOrFail($ticketSale);
+        $historyCount = TicketSalesPaymentHistory::where('ticket_sales_id', $ticketSale->id)->count();
+
+        if ($historyCount > 1) {
+            $validated = $request->validate([
+                'purchase_id' => ['nullable', Rule::exists('ticket_purchases', 'id')],
+                'customer_id' => ['nullable', Rule::exists('customers', 'id')],
+                'sell_price'  => ['required', 'numeric', 'min:0'],
+                'issue_date'  => ['nullable', 'date'],
+            ]);
+
+            $paid = (float) ($ticketSale->paid ?? 0);
+            $due  = (float) $validated['sell_price'] - $paid;
+
+            DB::transaction(function () use ($ticketSale, $validated, $due) {
+
+                $ticketSale->update([
+                    'purchase_id' => $validated['purchase_id'] ?? null,
+                    'customer_id' => $validated['customer_id'] ?? null,
+                    'sell_price'  => $validated['sell_price'],
+                    'due'         => $due,
+                    'issue_date'  => $validated['issue_date'] ?? null,
+                ]);
+
+                if (!empty($validated['purchase_id'])) {
+                    TicketPurchases::whereKey($validated['purchase_id'])
+                        ->update(['customer_id' => $validated['customer_id'] ?? null]);
+                }
+            });
+
+            return redirect()
+                ->route('ticket_sales.index')
+                ->with('success', 'Ticket sale updated (payment edit disabled because multiple payments exist).');
+        }
+
+
 
         $validated = $request->validate([
-            'purchase_id' => [
-                'nullable',
-                Rule::exists('ticket_purchases', 'id')
-                    ->where(fn($query) => $query->where($purchaseCompanyColumn, $companyId)),
-            ],
-            'customer_id' => [
-                'nullable',
-                Rule::exists('customers', 'id')
-                    ->where(fn($query) => $query->where($customerCompanyColumn, $companyId)),
-            ],
-            'account_id' => [
-                'nullable',
-                Rule::exists('accounts', 'id')
-                    ->where(fn($query) => $query->where($accountCompanyColumn, $companyId)),
-            ],
+            'purchase_id' => ['nullable', Rule::exists('ticket_purchases', 'id')],
+            'customer_id' => ['nullable', Rule::exists('customers', 'id')],
+            'account_id' => ['nullable', Rule::exists('accounts', 'id')],
             'sell_price' => ['required', 'numeric', 'min:0'],
             'paid' => ['nullable', 'numeric', 'min:0'],
-            'due' => ['nullable', 'numeric', 'min:0'],
             'issue_date' => ['nullable', 'date'],
         ]);
 
-        $ticketSale->update([
-            'purchase_id' => $validated['purchase_id'] ?? null,
-            'customer_id' => $validated['customer_id'] ?? null,
-            'account_id' => $validated['account_id'] ?? null,
-            'sell_price' => $validated['sell_price'],
-            'paid' => $validated['paid'] ?? 0,
-            'due' => $validated['due'] ?? 0,
-            'issue_date' => $validated['issue_date'] ?? null,
-        ]);
+        $due = $validated['sell_price'] - ($validated['paid'] ?? 0);
 
+        DB::transaction(function () use ($ticketSale, $validated, $due,) {
+
+            // Revert previous payment
+            Accounts::find($ticketSale->account_id)
+                ->decrement('current_balance', $ticketSale->paid);
+
+            // Add new payment
+            Accounts::find($validated['account_id'])
+                ->increment('current_balance', $validated['paid'] ?? 0);
+
+
+            TicketSalesPaymentHistory::where('ticket_sales_id', $ticketSale->id)
+                ->oldest('id')
+                ->first()
+                ?->update([
+                    'account_id' => $validated['account_id'] ?? null,
+                    'paid' => $validated['paid'] ?? 0,
+                    'due' => $due,
+                ]);
+
+            $ticketSale->update([
+                'purchase_id' => $validated['purchase_id'] ?? null,
+                'customer_id' => $validated['customer_id'] ?? null,
+                'account_id' => $validated['account_id'] ?? null,
+                'sell_price' => $validated['sell_price'],
+                'paid' => $validated['paid'] ?? 0,
+                'due' => $due,
+                'issue_date' => $validated['issue_date'] ?? null,
+            ]);
+        });
         return redirect()
             ->route('ticket_sales.index')
             ->with('success', 'Ticket sale updated successfully.');
     }
 
-    public function destroy(Request $request, int $ticketSale): RedirectResponse
+
+
+    public function destroy(int $ticketSale): RedirectResponse
     {
-        $companyId = $request->user()->company_id;
-        $ticketSale = $this->ownedTicketSale($companyId, $ticketSale);
+        $ticketSale = TicketSales::findOrFail($ticketSale);
+
+        Accounts::find($ticketSale->account_id)
+            ->decrement('current_balance', $ticketSale->paid);
+
         $ticketSale->delete();
+
 
         return redirect()
             ->route('ticket_sales.index')
             ->with('success', 'Ticket sale deleted successfully.');
     }
 
-    private function ownedTicketSale(int $companyId, int $ticketSaleId): TicketSales
+
+
+
+
+
+
+
+
+
+    public function paymentHistory(int $ticketSale): View
     {
-        return TicketSales::query()
-            ->where('id', $ticketSaleId)
-            ->where($this->companyColumn('ticket_sales'), $companyId)
-            ->firstOrFail();
+        $ticketSale = TicketSales::findOrFail($ticketSale);
+
+        $paymentHistory = TicketSalesPaymentHistory::where('ticket_sales_id', $ticketSale->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('admin.ticket_sales.payment_history', [
+            'ticketSale' => $ticketSale,
+            'paymentHistory' => $paymentHistory,
+        ]);
     }
 
-    private function companyColumn(string $table): string
+    public function addPaymentForm(int $ticketSale): View
     {
-        return Schema::hasColumn($table, 'company_id') ? 'company_id' : 'companies_id';
+        $ticketSale = TicketSales::findOrFail($ticketSale);
+
+        $accounts = Accounts::where('status', 'active')
+            ->orderBy('name')
+            ->get();
+
+        return view('admin.ticket_sales.payment_history_add', [
+            'ticketSale' => $ticketSale,
+            'accounts' => $accounts,
+        ]);
+    }
+
+    public function storePaymentHistory(Request $request, int $ticketSale): RedirectResponse
+    {
+        $ticketSale = TicketSales::findOrFail($ticketSale);
+
+        $validated = $request->validate([
+            'account_id' => ['nullable', Rule::exists('accounts', 'id')],
+            'paid' => ['required', 'numeric', 'min:0'],
+            // optional if you want:
+            // 'paid_at' => ['nullable', 'date'],
+            // 'notes' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        $paid = (float) $validated['paid'];
+        $accountId = $validated['account_id'] ?? null;
+
+        // ✅ Prevent paying more than sell_price (optional but recommended)
+        $alreadyPaid = (float) TicketSalesPaymentHistory::where('ticket_sales_id', $ticketSale->id)->sum('paid');
+        if ($paid + $alreadyPaid > (float) $ticketSale->sell_price) {
+            return back()
+                ->withErrors(['paid' => 'Paid amount exceeds sell price.'])
+                ->withInput();
+        }
+
+        DB::transaction(function () use ($ticketSale, $accountId, $paid) {
+            // 1) increment account balance (money received)
+            if ($accountId && $paid > 0) {
+                Accounts::whereKey($accountId)->increment('current_balance', $paid);
+            }
+
+            // 2) calculate new totals
+            $newPaidTotal = (float) TicketSalesPaymentHistory::where('ticket_sales_id', $ticketSale->id)->sum('paid') + $paid;
+            $due = (float) $ticketSale->sell_price - $newPaidTotal;
+
+            // 3) create history row (store due snapshot)
+            TicketSalesPaymentHistory::create([
+                'ticket_sales_id' => $ticketSale->id,
+                'account_id' => $accountId,
+                'paid' => $paid,
+                'due' => $due,
+            ]);
+
+            // 4) update ticket sale totals (and optionally account_id = last payment account)
+            $ticketSale->update([
+                'paid' => $newPaidTotal,
+                'due' => $due,
+                'account_id' => $accountId, // optional
+            ]);
+        });
+
+        return redirect()
+            ->route('ticket_sales.payment_history', $ticketSale->id)
+            ->with('success', 'Payment added successfully.');
+    }
+
+
+    public function editPaymentHistory(int $ticketSale, int $history): View
+    {
+        $ticketSale = TicketSales::findOrFail($ticketSale);
+
+        $historyRow = TicketSalesPaymentHistory::where('ticket_sales_id', $ticketSale->id)
+            ->where('id', $history)
+            ->firstOrFail();
+
+        $accounts = Accounts::where('status', 'active')->orderBy('name')->get();
+
+        return view('admin.ticket_sales.payment_history_edit', [
+            'ticketSale' => $ticketSale,
+            'historyRow' => $historyRow,
+            'accounts' => $accounts,
+        ]);
+    }
+
+    public function updatePaymentHistory(Request $request, int $ticketSale, int $history): RedirectResponse
+    {
+        $ticketSale = TicketSales::findOrFail($ticketSale);
+
+        $historyRow = TicketSalesPaymentHistory::where('ticket_sales_id', $ticketSale->id)
+            ->where('id', $history)
+            ->firstOrFail();
+
+        $validated = $request->validate([
+            'account_id' => ['nullable', Rule::exists('accounts', 'id')],
+            'paid' => ['required', 'numeric', 'min:0'],
+        ]);
+
+        $newAccountId = $validated['account_id'] ?? null;
+        $newPaid = (float) $validated['paid'];
+
+        // OLD values (before update)
+        $oldAccountId = $historyRow->account_id;
+        $oldPaid = (float) ($historyRow->paid ?? 0);
+
+        DB::transaction(function () use (
+            $ticketSale,
+            $historyRow,
+            $oldAccountId,
+            $oldPaid,
+            $newAccountId,
+            $newPaid
+        ) {
+            // 1) Reverse old balance effect
+            if ($oldAccountId && $oldPaid > 0) {
+                Accounts::whereKey($oldAccountId)->decrement('current_balance', $oldPaid);
+            }
+
+            // 2) Apply new balance effect
+            if ($newAccountId && $newPaid > 0) {
+                Accounts::whereKey($newAccountId)->increment('current_balance', $newPaid);
+            }
+
+            // 3) Update history row
+            $historyRow->update([
+                'account_id' => $newAccountId,
+                'paid' => $newPaid,
+            ]);
+
+            // 4) Recalculate sale totals from history rows
+            $paidTotal = (float) TicketSalesPaymentHistory::where('ticket_sales_id', $ticketSale->id)->sum('paid');
+            $due = (float) $ticketSale->sell_price - $paidTotal;
+
+            $ticketSale->update([
+                'paid' => $paidTotal,
+                'due' => $due,
+                // optional: set account_id to latest payment account
+                'account_id' => $newAccountId,
+            ]);
+
+            // 5) Update "due snapshot" for ALL history rows (optional)
+            // If you want each row to keep its own snapshot, remove this.
+            TicketSalesPaymentHistory::where('ticket_sales_id', $ticketSale->id)
+                ->update(['due' => $due]);
+        });
+
+        return redirect()
+            ->route('ticket_sales.payment_history', $ticketSale->id)
+            ->with('success', 'Payment history updated successfully.');
     }
 }

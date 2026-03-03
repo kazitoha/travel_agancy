@@ -13,12 +13,7 @@ class CustomerController extends Controller
 {
     public function index(Request $request): View
     {
-        $authUser = $request->user();
-
-        $customers = Customers::query()
-            ->where('company_id', $authUser->company_id)
-            ->latest()
-            ->get();
+        $customers = Customers::latest()->get();
 
         return view('admin.customers.index', [
             'customers' => $customers,
@@ -27,14 +22,12 @@ class CustomerController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $authUser = $request->user();
-
         $validated = $request->validate([
             'passport_number' => [
                 'required',
                 'string',
                 'max:100',
-                Rule::unique('customers', 'passport_number')->where(fn($query) => $query->where('company_id', $authUser->company_id)),
+                'unique:customers,passport_number',
             ],
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
@@ -43,16 +36,7 @@ class CustomerController extends Controller
             'address' => ['required', 'string', 'max:2000'],
         ]);
 
-        Customers::create([
-            'company_id' => $authUser->company_id,
-            'user_id' => $authUser->id,
-            'passport_number' => $validated['passport_number'],
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'phone' => $validated['phone'],
-            'date_of_birth' => $validated['date_of_birth'],
-            'address' => $validated['address'],
-        ]);
+        Customers::create($validated);
 
         return redirect()
             ->route('customers.index')
@@ -61,7 +45,7 @@ class CustomerController extends Controller
 
     public function edit(Request $request, int $customer): View
     {
-        $customer = $this->ownedCustomer($request, $customer);
+        $customer = Customers::findOrFail($customer);
 
         return view('admin.customers.edit', [
             'customer' => $customer,
@@ -70,16 +54,14 @@ class CustomerController extends Controller
 
     public function update(Request $request, int $customer): RedirectResponse
     {
-        $customer = $this->ownedCustomer($request, $customer);
+        $customer = Customers::findOrFail($customer);
 
         $validated = $request->validate([
             'passport_number' => [
                 'required',
                 'string',
                 'max:100',
-                Rule::unique('customers', 'passport_number')
-                    ->where(fn($query) => $query->where('company_id', $request->user()->company_id))
-                    ->ignore($customer->id),
+                Rule::unique('customers', 'passport_number')->ignore($customer->id),
             ],
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
@@ -97,19 +79,11 @@ class CustomerController extends Controller
 
     public function destroy(Request $request, int $customer): RedirectResponse
     {
-        $customer = $this->ownedCustomer($request, $customer);
+        $customer = Customers::findOrFail($customer);
         $customer->delete();
 
         return redirect()
             ->route('customers.index')
             ->with('success', 'Customer deleted successfully.');
-    }
-
-    private function ownedCustomer(Request $request, int $customerId): Customers
-    {
-        return Customers::query()
-            ->where('id', $customerId)
-            ->where('company_id', $request->user()->company_id)
-            ->firstOrFail();
     }
 }

@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\CompanyScoped;
+use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class TicketSales extends Model
 {
+    use CompanyScoped, LogsActivity;
     protected $table = 'ticket_sales';
 
     protected $fillable = [

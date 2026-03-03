@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\CompanyScoped;
 use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Accounts extends Model
 {
-    use LogsActivity;
+    use LogsActivity, CompanyScoped;
 
 
     protected $fillable = [
