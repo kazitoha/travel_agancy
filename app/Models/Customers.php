@@ -6,6 +6,7 @@ use App\Traits\CompanyScoped;
 use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\Reference;
 
 class Customers extends Model
 {
@@ -15,7 +16,7 @@ class Customers extends Model
 
     protected $fillable = [
         'company_id',
-        'user_id',
+        'reference_id',
         'passport_number',
         'name',
         'email',
@@ -39,5 +40,10 @@ class Customers extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function reference(): BelongsTo
+    {
+        return $this->belongsTo(Reference::class);
     }
 }

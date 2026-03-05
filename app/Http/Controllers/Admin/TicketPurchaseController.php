@@ -31,7 +31,10 @@ class TicketPurchaseController extends Controller
             'vendor:id,name',
             'customer:id,name',
             'account:id,name',
-        ])->latest()->get();
+        ])
+            ->whereDoesntHave('ticketSale')
+            ->latest()
+            ->get();
 
         return view('admin.ticket_purchases.index', compact(
             'vendors',
@@ -87,7 +90,7 @@ class TicketPurchaseController extends Controller
                 'flight_date' => $validated['flight_date'],
                 'sector'      => $validated['sector'],
                 'carrier'     => $validated['carrier'],
-                'net_fare'    => $net,
+                'net_fare'    => $validated['net_fare'],
                 'paid_amount' => $paid,
                 'due_amount'  => $due,
                 'issue_date'  => $validated['issue_date'] ?? null,

@@ -36,7 +36,7 @@
                         <label class="text-sm font-semibold text-slate-700">Passport Number</label>
                         <input type="text" name="passport_number" value="{{ old('passport_number') }}"
                             class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4"
-                            required>
+                            >
                     </div>
 
                     <div>
@@ -47,10 +47,24 @@
                     </div>
 
                     <div>
+                        <label class="text-sm font-semibold text-slate-700">Reference (optional)</label>
+                        <select name="reference_id"
+                            class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4">
+                            <option value="">No reference</option>
+                            @foreach ($references as $reference)
+                                <option value="{{ $reference->id }}"
+                                    @selected(old('reference_id') == $reference->id)>
+                                    {{ $reference->company_name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
                         <label class="text-sm font-semibold text-slate-700">Email</label>
                         <input type="email" name="email" value="{{ old('email') }}"
                             class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4"
-                            required>
+                            >
                     </div>
 
                     <div>
@@ -64,7 +78,7 @@
                         <label class="text-sm font-semibold text-slate-700">Date of Birth</label>
                         <input type="date" name="date_of_birth" value="{{ old('date_of_birth') }}"
                             class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4"
-                            required>
+                            >
                     </div>
 
                     <div>
@@ -91,6 +105,7 @@
                                 <tr class="text-left text-xs uppercase tracking-wide text-slate-400">
                                     <th class="px-4 py-3">Passport</th>
                                     <th class="px-4 py-3">Name</th>
+                                    <th class="px-4 py-3">Reference</th>
                                     <th class="px-4 py-3">Email</th>
                                     <th class="px-4 py-3">Phone</th>
                                     <th class="px-4 py-3">DOB</th>
@@ -103,6 +118,7 @@
                                     <tr class="bg-white hover:bg-slate-50">
                                         <td class="px-4 py-3 font-semibold text-slate-900">{{ $customer->passport_number }}</td>
                                         <td class="px-4 py-3 text-slate-700">{{ $customer->name }}</td>
+                                        <td class="px-4 py-3 text-slate-700">{{ $customer->reference?->company_name }}</td>
                                         <td class="px-4 py-3 text-slate-700">{{ $customer->email }}</td>
                                         <td class="px-4 py-3 text-slate-700">{{ $customer->phone }}</td>
                                         <td class="px-4 py-3 text-slate-700">{{ $customer->date_of_birth?->format('M j, Y') }}</td>
@@ -127,7 +143,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="7" class="px-6 py-10 text-center text-sm text-slate-500">No customers found.</td>
+                                        <td colspan="8" class="px-6 py-10 text-center text-sm text-slate-500">No customers found.</td>
                                     </tr>
                                 @endforelse
                             </tbody>

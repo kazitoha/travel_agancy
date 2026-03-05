@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Customers;
+use App\Models\Reference;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -13,16 +14,22 @@ class CustomerController extends Controller
 {
     public function index(Request $request): View
     {
-        $customers = Customers::latest()->get();
+        $customers = Customers::with('reference')->latest()->get();
+        $references = Reference::orderBy('company_name')->get();
 
         return view('admin.customers.index', [
             'customers' => $customers,
+            'references' => $references,
         ]);
     }
 
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
+            'reference_id' => [
+                'nullable',
+                Rule::exists('references', 'id')->where(fn($query) => $query->where('company_id', $request->session()->get('company_id'))),
+            ],
             'passport_number' => [
                 'nullable',
                 'string',
@@ -46,9 +53,11 @@ class CustomerController extends Controller
     public function edit(Request $request, int $customer): View
     {
         $customer = Customers::findOrFail($customer);
+        $references = Reference::orderBy('company_name')->get();
 
         return view('admin.customers.edit', [
             'customer' => $customer,
+            'references' => $references,
         ]);
     }
 
@@ -57,16 +66,20 @@ class CustomerController extends Controller
         $customer = Customers::findOrFail($customer);
 
         $validated = $request->validate([
+            'reference_id' => [
+                'nullable',
+                Rule::exists('references', 'id')->where(fn($query) => $query->where('company_id', $request->session()->get('company_id'))),
+            ],
             'passport_number' => [
-                'required',
+                'nullable',
                 'string',
                 'max:100',
                 Rule::unique('customers', 'passport_number')->ignore($customer->id),
             ],
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255'],
+            'email' => ['nullable', 'email', 'max:255'],
             'phone' => ['required', 'string', 'max:30'],
-            'date_of_birth' => ['required', 'date', 'before_or_equal:today'],
+            'date_of_birth' => ['nullable', 'date', 'before_or_equal:today'],
             'address' => ['required', 'string', 'max:2000'],
         ]);
 
@@ -85,5 +98,14 @@ class CustomerController extends Controller
         return redirect()
             ->route('customers.index')
             ->with('success', 'Customer deleted successfully.');
+    }
+
+    public function history(Request $request, int $customer): View
+    {
+        $customer = Customers::with('reference')->findOrFail($customer);
+
+        return view('admin.customers.history', [
+            'customer' => $customer,
+        ]);
     }
 }

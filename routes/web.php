@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AccountController;
 use App\Http\Controllers\Admin\ExpenseController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\CustomerController;
+use App\Http\Controllers\Admin\ReferenceController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\TicketPurchaseController;
 use App\Http\Controllers\Admin\TicketSaleController;
@@ -72,6 +73,13 @@ Route::middleware(['auth', 'ensure.permission'])->group(function () {
     Route::get('/customers/{customer}/edit', [CustomerController::class, 'edit'])->name('customers.edit');
     Route::put('/customers/{customer}', [CustomerController::class, 'update'])->name('customers.update');
     Route::delete('/customers/{customer}', [CustomerController::class, 'destroy'])->name('customers.destroy');
+
+    Route::get('/references', [ReferenceController::class, 'index'])->name('references.index');
+    Route::post('/references', [ReferenceController::class, 'store'])->name('references.store');
+    Route::get('/references/{reference}/edit', [ReferenceController::class, 'edit'])->name('references.edit');
+    Route::get('/references/{reference}/history', [ReferenceController::class, 'history'])->name('references.history');
+    Route::put('/references/{reference}', [ReferenceController::class, 'update'])->name('references.update');
+    Route::delete('/references/{reference}', [ReferenceController::class, 'destroy'])->name('references.destroy');
 
 
 

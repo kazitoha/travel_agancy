@@ -30,7 +30,7 @@
                     <label class="text-sm font-semibold text-slate-700">Passport Number</label>
                     <input type="text" name="passport_number" value="{{ old('passport_number', $customer->passport_number) }}"
                         class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4"
-                        required>
+                        >
                 </div>
 
                 <div>
@@ -41,10 +41,24 @@
                 </div>
 
                 <div>
+                    <label class="text-sm font-semibold text-slate-700">Reference (optional)</label>
+                    <select name="reference_id"
+                        class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4">
+                        <option value="">No reference</option>
+                        @foreach ($references as $reference)
+                            <option value="{{ $reference->id }}"
+                                @selected(old('reference_id', $customer->reference_id) == $reference->id)>
+                                {{ $reference->company_name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div>
                     <label class="text-sm font-semibold text-slate-700">Email</label>
                     <input type="email" name="email" value="{{ old('email', $customer->email) }}"
                         class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4"
-                        required>
+                        >
                 </div>
 
                 <div>
@@ -58,14 +72,14 @@
                     <label class="text-sm font-semibold text-slate-700">Date of Birth</label>
                     <input type="date" name="date_of_birth" value="{{ old('date_of_birth', $customer->date_of_birth?->format('Y-m-d')) }}"
                         class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4"
-                        required>
+                        >
                 </div>
 
                 <div>
                     <label class="text-sm font-semibold text-slate-700">Address</label>
                     <textarea name="address" rows="3"
                         class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4"
-                        required>{{ old('address', $customer->address) }}</textarea>
+                        >{{ old('address', $customer->address) }}</textarea>
                 </div>
 
                 <div class="flex items-center justify-end gap-2">

@@ -57,4 +57,8 @@ class TicketPurchases extends Model
     {
         return $this->belongsTo(Companies::class, 'company_id');
     }
+    public function ticketSale()
+    {
+        return $this->hasOne(TicketSales::class, 'purchase_id', 'id');
+    }
 }

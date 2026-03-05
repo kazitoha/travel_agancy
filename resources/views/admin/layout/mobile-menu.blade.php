@@ -43,6 +43,13 @@
             'icon_theme' => 'emerald',
         ],
         [
+            'label' => 'References',
+            'icon' => 'users',
+            'route' => 'references.index',
+            'patterns' => ['references.*'],
+            'icon_theme' => 'orange',
+        ],
+        [
             'label' => 'Ticket Purchases',
             'icon' => 'receipt',
             'route' => 'ticket_purchases.index',

@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Companies;
+use App\Models\Reference;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -15,7 +16,7 @@ return new class extends Migration
     {
         Schema::create('customers', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Reference::class)->nullable()->constrained()->cascadeOnDelete();
             $table->string('passport_number', 100)->nullable();
             $table->string('name');
             $table->string('email')->nullable();
@@ -24,7 +25,6 @@ return new class extends Migration
             $table->text('address')->nullable();
             $table->timestamps();
             $table->foreignIdFor(Companies::class, 'company_id')->constrained('companies')->cascadeOnDelete();
-
             $table->unique(['company_id', 'passport_number']);
         });
     }
