@@ -14,7 +14,6 @@ class Vendors extends Model
     protected $table = 'vendors';
 
     protected $fillable = [
-        'user_id',
         'name',
         'email',
         'mobile',
@@ -25,10 +24,5 @@ class Vendors extends Model
     public function company(): BelongsTo
     {
         return $this->belongsTo(Companies::class, 'company_id');
-    }
-
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
     }
 }
