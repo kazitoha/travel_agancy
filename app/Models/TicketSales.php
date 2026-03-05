@@ -6,6 +6,7 @@ use App\Traits\CompanyScoped;
 use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\Reference;
 
 class TicketSales extends Model
 {
@@ -13,6 +14,7 @@ class TicketSales extends Model
     protected $table = 'ticket_sales';
 
     protected $fillable = [
+        'reference_id',
         'purchase_id',
         'customer_id',
         'account_id',
@@ -36,6 +38,11 @@ class TicketSales extends Model
     public function purchase(): BelongsTo
     {
         return $this->belongsTo(TicketPurchases::class, 'purchase_id');
+    }
+
+    public function reference(): BelongsTo
+    {
+        return $this->belongsTo(Reference::class, 'reference_id');
     }
 
     public function customer(): BelongsTo

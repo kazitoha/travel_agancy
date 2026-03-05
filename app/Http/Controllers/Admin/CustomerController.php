@@ -14,7 +14,7 @@ class CustomerController extends Controller
 {
     public function index(Request $request): View
     {
-        $customers = Customers::with('reference')->latest()->get();
+        $customers = Customers::latest()->get();
         $references = Reference::orderBy('company_name')->get();
 
         return view('admin.customers.index', [
@@ -80,7 +80,7 @@ class CustomerController extends Controller
             'email' => ['nullable', 'email', 'max:255'],
             'phone' => ['required', 'string', 'max:30'],
             'date_of_birth' => ['nullable', 'date', 'before_or_equal:today'],
-            'address' => ['required', 'string', 'max:2000'],
+            'address' => ['nullable', 'string', 'max:2000'],
         ]);
 
         $customer->update($validated);

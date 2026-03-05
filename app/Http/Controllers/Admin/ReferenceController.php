@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Reference;
-use App\Models\TicketPurchases;
+use App\Models\TicketSales;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -77,21 +77,22 @@ class ReferenceController extends Controller
     {
         $reference = Reference::findOrFail($reference);
 
-        $ticketPurchases = TicketPurchases::with([
+        $ticketSales = TicketSales::with([
+            'purchase:id,sector,carrier,flight_date',
             'customer:id,name',
             'account:id,name',
         ])
-            ->whereHas('customer', fn($query) => $query->where('reference_id', $reference->id))
+            ->where('reference_id', $reference->id)
             ->latest()
             ->get();
 
-        $totalTickets = $ticketPurchases->count();
-        $totalPaid = (float) $ticketPurchases->sum('paid_amount');
-        $totalDue = (float) $ticketPurchases->sum('due_amount');
+        $totalTickets = $ticketSales->count();
+        $totalPaid = (float) $ticketSales->sum('paid');
+        $totalDue = (float) $ticketSales->sum('due');
 
         return view('admin.references.history', [
             'reference' => $reference,
-            'ticketPurchases' => $ticketPurchases,
+            'ticketSales' => $ticketSales,
             'totalTickets' => $totalTickets,
             'totalPaid' => $totalPaid,
             'totalDue' => $totalDue,

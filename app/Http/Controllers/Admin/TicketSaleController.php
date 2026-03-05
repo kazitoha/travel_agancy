@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Accounts;
 use App\Models\Customers;
+use App\Models\Reference;
 use App\Models\TicketPurchases;
 use App\Models\TicketSales;
 use App\Models\TicketSalesPaymentHistory;
@@ -19,6 +20,7 @@ class TicketSaleController extends Controller
     public function index(Request $request): View
     {
         $customers = Customers::orderBy('name')->get();
+        $references = Reference::orderBy('company_name')->get();
 
         $accounts = Accounts::where('status', 'active')
             ->orderBy('name')
@@ -38,6 +40,7 @@ class TicketSaleController extends Controller
 
         $ticketSales = TicketSales::with([
             'purchase:id,sector,carrier,flight_date',
+            'reference:id,company_name',
             'customer:id,name',
             'account:id,name',
         ])
@@ -46,6 +49,7 @@ class TicketSaleController extends Controller
 
         return view('admin.ticket_sales.index', [
             'customers' => $customers,
+            'references' => $references,
             'accounts' => $accounts,
             'purchases' => $purchases,
             'ticketSales' => $ticketSales,
@@ -60,8 +64,12 @@ class TicketSaleController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'purchase_id' => ['required', Rule::exists('ticket_purchases', 'id')],
-            'customer_id' => ['required', Rule::exists('customers', 'id')],
+            'reference_id' => [
+                'nullable',
+                Rule::exists('references', 'id')->where(fn($query) => $query->where('company_id', $request->session()->get('company_id'))),
+            ],
+            'purchase_id' => ['nullable', Rule::exists('ticket_purchases', 'id')],
+            'customer_id' => ['nullable', Rule::exists('customers', 'id')],
             'account_id' => ['nullable', Rule::exists('accounts', 'id')],
             'sell_price' => ['required', 'numeric', 'min:0'],
             'paid' => ['nullable', 'numeric', 'min:0'],
@@ -72,10 +80,13 @@ class TicketSaleController extends Controller
 
         DB::transaction(function () use ($validated, $due) {
 
-            Accounts::find($validated['account_id'])
-                ->increment('current_balance', $validated['paid'] ?? 0);
+            if (!empty($validated['account_id']) && ($validated['paid'] ?? 0) > 0) {
+                Accounts::find($validated['account_id'])
+                    ->increment('current_balance', $validated['paid'] ?? 0);
+            }
 
             $ticketSale =  TicketSales::create([
+                'reference_id' => $validated['reference_id'] ?? null,
                 'purchase_id' => $validated['purchase_id'] ?? null,
                 'customer_id' => $validated['customer_id'] ?? null,
                 'account_id' => $validated['account_id'] ?? null,
@@ -85,7 +96,7 @@ class TicketSaleController extends Controller
                 'issue_date' => $validated['issue_date'] ?? null,
             ]);
 
-            if ($validated['paid'] > 0) {
+            if (($validated['paid'] ?? 0) > 0) {
                 TicketSalesPaymentHistory::create([
                     'ticket_sales_id' =>  $ticketSale->id,
                     'account_id' => $validated['account_id'] ?? null,
@@ -94,8 +105,10 @@ class TicketSaleController extends Controller
                 ]);
             }
 
-            TicketPurchases::find($validated['purchase_id'])
-                ->update(['customer_id' => $validated['customer_id'] ?? null]);
+            if (!empty($validated['purchase_id'])) {
+                TicketPurchases::find($validated['purchase_id'])
+                    ->update(['customer_id' => $validated['customer_id'] ?? null]);
+            }
         });
 
         return redirect()
@@ -108,6 +121,7 @@ class TicketSaleController extends Controller
         $ticketSale = TicketSales::findOrFail($ticketSale);
 
         $customers = Customers::orderBy('name')->get();
+        $references = Reference::orderBy('company_name')->get();
 
         $accounts = Accounts::where('status', 'active')
             ->orderBy('name')
@@ -123,6 +137,7 @@ class TicketSaleController extends Controller
         return view('admin.ticket_sales.edit', [
             'ticketSale' => $ticketSale,
             'customers' => $customers,
+            'references' => $references,
             'accounts' => $accounts,
             'purchases' => $purchases,
         ]);
@@ -135,6 +150,10 @@ class TicketSaleController extends Controller
 
         if ($historyCount > 1) {
             $validated = $request->validate([
+                'reference_id' => [
+                    'nullable',
+                    Rule::exists('references', 'id')->where(fn($query) => $query->where('company_id', $request->session()->get('company_id'))),
+                ],
                 'purchase_id' => ['nullable', Rule::exists('ticket_purchases', 'id')],
                 'customer_id' => ['nullable', Rule::exists('customers', 'id')],
                 'sell_price'  => ['required', 'numeric', 'min:0'],
@@ -147,6 +166,7 @@ class TicketSaleController extends Controller
             DB::transaction(function () use ($ticketSale, $validated, $due) {
 
                 $ticketSale->update([
+                    'reference_id' => $validated['reference_id'] ?? null,
                     'purchase_id' => $validated['purchase_id'] ?? null,
                     'customer_id' => $validated['customer_id'] ?? null,
                     'sell_price'  => $validated['sell_price'],
@@ -168,6 +188,10 @@ class TicketSaleController extends Controller
 
 
         $validated = $request->validate([
+            'reference_id' => [
+                'nullable',
+                Rule::exists('references', 'id')->where(fn($query) => $query->where('company_id', $request->session()->get('company_id'))),
+            ],
             'purchase_id' => ['nullable', Rule::exists('ticket_purchases', 'id')],
             'customer_id' => ['nullable', Rule::exists('customers', 'id')],
             'account_id' => ['nullable', Rule::exists('accounts', 'id')],
@@ -181,12 +205,16 @@ class TicketSaleController extends Controller
         DB::transaction(function () use ($ticketSale, $validated, $due,) {
 
             // Revert previous payment
-            Accounts::find($ticketSale->account_id)
-                ->decrement('current_balance', $ticketSale->paid);
+            if (!empty($ticketSale->account_id) && ($ticketSale->paid ?? 0) > 0) {
+                Accounts::find($ticketSale->account_id)
+                    ->decrement('current_balance', $ticketSale->paid);
+            }
 
             // Add new payment
-            Accounts::find($validated['account_id'])
-                ->increment('current_balance', $validated['paid'] ?? 0);
+            if (!empty($validated['account_id']) && ($validated['paid'] ?? 0) > 0) {
+                Accounts::find($validated['account_id'])
+                    ->increment('current_balance', $validated['paid'] ?? 0);
+            }
 
 
             TicketSalesPaymentHistory::where('ticket_sales_id', $ticketSale->id)
@@ -199,6 +227,7 @@ class TicketSaleController extends Controller
                 ]);
 
             $ticketSale->update([
+                'reference_id' => $validated['reference_id'] ?? null,
                 'purchase_id' => $validated['purchase_id'] ?? null,
                 'customer_id' => $validated['customer_id'] ?? null,
                 'account_id' => $validated['account_id'] ?? null,
@@ -219,8 +248,10 @@ class TicketSaleController extends Controller
     {
         $ticketSale = TicketSales::findOrFail($ticketSale);
 
-        Accounts::find($ticketSale->account_id)
-            ->decrement('current_balance', $ticketSale->paid);
+        if (!empty($ticketSale->account_id) && ($ticketSale->paid ?? 0) > 0) {
+            Accounts::find($ticketSale->account_id)
+                ->decrement('current_balance', $ticketSale->paid);
+        }
 
         $ticketSale->delete();
 

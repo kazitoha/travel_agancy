@@ -41,9 +41,4 @@ class Customers extends Model
     {
         return $this->belongsTo(User::class);
     }
-
-    public function reference(): BelongsTo
-    {
-        return $this->belongsTo(Reference::class);
-    }
 }

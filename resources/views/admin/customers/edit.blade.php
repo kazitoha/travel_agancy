@@ -39,21 +39,6 @@
                         class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4"
                         required>
                 </div>
-
-                <div>
-                    <label class="text-sm font-semibold text-slate-700">Reference (optional)</label>
-                    <select name="reference_id"
-                        class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4">
-                        <option value="">No reference</option>
-                        @foreach ($references as $reference)
-                            <option value="{{ $reference->id }}"
-                                @selected(old('reference_id', $customer->reference_id) == $reference->id)>
-                                {{ $reference->company_name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
                 <div>
                     <label class="text-sm font-semibold text-slate-700">Email</label>
                     <input type="email" name="email" value="{{ old('email', $customer->email) }}"

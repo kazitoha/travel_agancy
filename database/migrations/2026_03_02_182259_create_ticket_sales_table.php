@@ -3,6 +3,7 @@
 use App\Models\Accounts;
 use App\Models\Companies;
 use App\Models\Customers;
+use App\Models\Reference;
 use App\Models\TicketPurchases;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -17,6 +18,7 @@ return new class extends Migration
     {
         Schema::create('ticket_sales', function (Blueprint $table) {
             $table->id();
+            $table->foreignIdFor(Reference::class)->nullable()->constrained()->cascadeOnDelete();
             $table->foreignIdFor(TicketPurchases::class, 'purchase_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignIdFor(Customers::class, 'customer_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignIdFor(Accounts::class, 'account_id')->nullable()->constrained()->nullOnDelete();

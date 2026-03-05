@@ -36,7 +36,7 @@
         </div>
 
         <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div class="text-sm font-bold text-slate-900">Ticket purchases</div>
+            <div class="text-sm font-bold text-slate-900">Ticket sales</div>
 
             <div class="mt-5 overflow-hidden rounded-2xl border border-slate-200">
                 <div class="overflow-x-auto">
@@ -55,7 +55,7 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
-                            @forelse ($ticketPurchases as $ticket)
+                            @forelse ($ticketSales as $ticket)
                                 <tr class="bg-white hover:bg-slate-50">
                                     <td class="px-4 py-3 text-slate-700">
                                         {{ $ticket->customer?->name ?? '—' }}
@@ -64,18 +64,18 @@
                                         {{ $ticket->account?->name ?? '—' }}
                                     </td>
                                     <td class="px-4 py-3 text-slate-700">
-                                        {{ $ticket->flight_date?->format('M j, Y') }}
+                                        {{ $ticket->purchase?->flight_date?->format('M j, Y') }}
                                     </td>
-                                    <td class="px-4 py-3 text-slate-700">{{ $ticket->sector }}</td>
-                                    <td class="px-4 py-3 text-slate-700">{{ $ticket->carrier }}</td>
+                                    <td class="px-4 py-3 text-slate-700">{{ $ticket->purchase?->sector }}</td>
+                                    <td class="px-4 py-3 text-slate-700">{{ $ticket->purchase?->carrier }}</td>
                                     <td class="px-4 py-3 text-slate-700">
-                                        {{ number_format((float) $ticket->net_fare, 2) }}
-                                    </td>
-                                    <td class="px-4 py-3 text-slate-700">
-                                        {{ number_format((float) $ticket->paid_amount, 2) }}
+                                        {{ number_format((float) $ticket->sell_price, 2) }}
                                     </td>
                                     <td class="px-4 py-3 text-slate-700">
-                                        {{ number_format((float) $ticket->due_amount, 2) }}
+                                        {{ number_format((float) $ticket->paid, 2) }}
+                                    </td>
+                                    <td class="px-4 py-3 text-slate-700">
+                                        {{ number_format((float) $ticket->due, 2) }}
                                     </td>
                                     <td class="px-4 py-3 text-slate-700">
                                         {{ $ticket->issue_date?->format('M j, Y') ?? '—' }}
@@ -84,7 +84,7 @@
                             @empty
                                 <tr>
                                     <td colspan="9" class="px-6 py-10 text-center text-sm text-slate-500">
-                                        No ticket purchases found for this reference.
+                                        No ticket sales found for this reference.
                                     </td>
                                 </tr>
                             @endforelse

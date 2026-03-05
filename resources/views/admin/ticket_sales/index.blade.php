@@ -71,6 +71,19 @@
                     </div>
 
                     <div>
+                        <label class="text-sm font-semibold text-slate-700">Reference (optional)</label>
+                        <select name="reference_id"
+                            class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4">
+                            <option value="">Select reference (optional)</option>
+                            @foreach ($references as $reference)
+                                <option value="{{ $reference->id }}" @selected(old('reference_id') == $reference->id)>
+                                    {{ $reference->company_name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
                         <label class="text-sm font-semibold text-slate-700">Account (payment to)</label>
                         <select name="account_id"
                             class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4">
@@ -121,6 +134,7 @@
                                 <tr class="text-left text-xs uppercase tracking-wide text-slate-400">
                                     <th class="px-4 py-3">Purchase</th>
                                     <th class="px-4 py-3">Customer</th>
+                                    <th class="px-4 py-3">Reference</th>
                                     <th class="px-4 py-3">Account</th>
                                     <th class="px-4 py-3">Sell price</th>
                                     <th class="px-4 py-3">Paid</th>
@@ -137,6 +151,9 @@
                                         </td>
                                         <td class="px-4 py-3 text-slate-700">
                                             {{ $sale->customer?->name ?? '—' }}
+                                        </td>
+                                        <td class="px-4 py-3 text-slate-700">
+                                            {{ $sale->reference?->company_name ?? '—' }}
                                         </td>
                                         <td class="px-4 py-3 text-slate-700">
                                             {{ $sale->account?->name ?? '—' }}
@@ -177,7 +194,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="8" class="px-6 py-10 text-center text-sm text-slate-500">No ticket sales found.</td>
+                                        <td colspan="9" class="px-6 py-10 text-center text-sm text-slate-500">No ticket sales found.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
