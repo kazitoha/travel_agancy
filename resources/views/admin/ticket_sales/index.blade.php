@@ -193,11 +193,6 @@
                                         class="mt-2 w-full amount-input rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none ring-blue-200 transition focus:border-blue-300 focus:bg-white focus:ring-4">
                                 </div>
 
-                                <div>
-                                    <label class="text-sm font-semibold text-slate-700">Flight date</label>
-                                    <input type="date" name="flight_date" value="{{ old('flight_date') }}"
-                                        class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none ring-blue-200 transition focus:border-blue-300 focus:bg-white focus:ring-4">
-                                </div>
 
                                 <div>
                                     <label class="text-sm font-semibold text-slate-700">Issue date</label>

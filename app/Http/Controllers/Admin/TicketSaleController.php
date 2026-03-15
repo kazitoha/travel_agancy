@@ -100,7 +100,6 @@ class TicketSaleController extends Controller
             'account_id' => ['nullable', Rule::exists('accounts', 'id')],
             'sell_price' => ['required', 'numeric', 'min:0'],
             'paid' => ['nullable', 'numeric', 'min:0'],
-            'flight_date' => ['nullable', 'date'],
             'issue_date' => ['nullable', 'date'],
         ]);
 
@@ -113,6 +112,12 @@ class TicketSaleController extends Controller
                     ->increment('current_balance', $validated['paid'] ?? 0);
             }
 
+
+            if (!empty($validated['purchase_id'])) {
+                $ticketPurchase = TicketPurchases::find($validated['purchase_id'])
+                    ->update(['customer_id' => $validated['customer_id'] ?? null]);
+            }
+
             $ticketSale =  TicketSales::create([
                 'reference_id' => $validated['reference_id'] ?? null,
                 'purchase_id' => $validated['purchase_id'] ?? null,
@@ -121,7 +126,7 @@ class TicketSaleController extends Controller
                 'sell_price' => $validated['sell_price'],
                 'paid' => $validated['paid'] ?? 0,
                 'due' => $due,
-                'flight_date' => $validated['flight_date'] ?? null,
+                'flight_date' =>  $ticketPurchase->flight_date ?? null,
                 'issue_date' => $validated['issue_date'] ?? null,
             ]);
 
@@ -132,11 +137,6 @@ class TicketSaleController extends Controller
                     'paid' => $validated['paid'] ?? 0,
                     'due' => $due,
                 ]);
-            }
-
-            if (!empty($validated['purchase_id'])) {
-                TicketPurchases::find($validated['purchase_id'])
-                    ->update(['customer_id' => $validated['customer_id'] ?? null]);
             }
         });
 
@@ -186,14 +186,20 @@ class TicketSaleController extends Controller
                 'purchase_id' => ['nullable', Rule::exists('ticket_purchases', 'id')],
                 'customer_id' => ['nullable', Rule::exists('customers', 'id')],
                 'sell_price'  => ['required', 'numeric', 'min:0'],
-                'flight_date' => ['nullable', 'date'],
                 'issue_date'  => ['nullable', 'date'],
             ]);
 
             $paid = (float) ($ticketSale->paid ?? 0);
             $due  = (float) $validated['sell_price'] - $paid;
+            $ticketPurchase = TicketPurchases::find($validated['purchase_id']);
 
-            DB::transaction(function () use ($ticketSale, $validated, $due) {
+            DB::transaction(function () use ($ticketSale, $validated, $due, $ticketPurchase) {
+
+
+                if (!empty($validated['purchase_id'])) {
+                    $ticketPurchase->update(['customer_id' => $validated['customer_id'] ?? null]);
+                }
+
 
                 $ticketSale->update([
                     'reference_id' => $validated['reference_id'] ?? null,
@@ -201,14 +207,9 @@ class TicketSaleController extends Controller
                     'customer_id' => $validated['customer_id'] ?? null,
                     'sell_price'  => $validated['sell_price'],
                     'due'         => $due,
-                    'flight_date' => $validated['flight_date'] ?? null,
+                    'flight_date' => $ticketPurchase->flight_date ?? null,
                     'issue_date'  => $validated['issue_date'] ?? null,
                 ]);
-
-                if (!empty($validated['purchase_id'])) {
-                    TicketPurchases::whereKey($validated['purchase_id'])
-                        ->update(['customer_id' => $validated['customer_id'] ?? null]);
-                }
             });
 
             return redirect()
@@ -228,13 +229,12 @@ class TicketSaleController extends Controller
             'account_id' => ['nullable', Rule::exists('accounts', 'id')],
             'sell_price' => ['required', 'numeric', 'min:0'],
             'paid' => ['nullable', 'numeric', 'min:0'],
-            'flight_date' => ['nullable', 'date'],
             'issue_date' => ['nullable', 'date'],
         ]);
 
         $due = $validated['sell_price'] - ($validated['paid'] ?? 0);
-
-        DB::transaction(function () use ($ticketSale, $validated, $due,) {
+        $ticketPurchase = TicketPurchases::find($validated['purchase_id']);
+        DB::transaction(function () use ($ticketSale, $validated, $due, $ticketPurchase) {
 
             // Revert previous payment
             if (!empty($ticketSale->account_id) && ($ticketSale->paid ?? 0) > 0) {
@@ -266,7 +266,7 @@ class TicketSaleController extends Controller
                 'sell_price' => $validated['sell_price'],
                 'paid' => $validated['paid'] ?? 0,
                 'due' => $due,
-                'flight_date' => $validated['flight_date'] ?? null,
+                'flight_date' => $ticketPurchase->flight_date ?? null,
                 'issue_date' => $validated['issue_date'] ?? null,
             ]);
         });

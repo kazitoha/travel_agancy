@@ -105,13 +105,7 @@
                         class="mt-2 w-full amount-input rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4">
                 </div>
 
-                <div>
-                    <label class="text-sm font-semibold text-slate-700">Flight date</label>
-                    <input type="date" name="flight_date"
-                        value="{{ old('flight_date', optional($ticketSale->flight_date)->format('Y-m-d')) }}"
-                        class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4">
-                </div>
-
+               
                 <div>
                     <label class="text-sm font-semibold text-slate-700">Issue date</label>
                     <input type="date" name="issue_date"

@@ -188,7 +188,7 @@
 
                                 <div>
                                     <label class="text-sm font-semibold text-slate-700">Paid</label>
-                                    <input type="number"  name="paid_amount" step="0.01" min="0" value="{{ old('paid_amount', 0) }}"
+                                    <input  name="paid_amount" step="0.01" min="0" value="{{ old('paid_amount') }}" placeholder="0"
                                         class="mt-2 w-full amount-input rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none ring-blue-200 transition focus:border-blue-300 focus:bg-white focus:ring-4">
                                 </div>
 

@@ -101,6 +101,7 @@
                         class="mt-2 w-full amount-input rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4"
                         required>
                 </div>
+                <div class="text-right"><b>Total Fare: net_fare * person</b></div>
 
                 <div>
                     <label class="text-sm font-semibold text-slate-700">Paid</label>
