@@ -22,7 +22,7 @@
         </div>
 
         <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <form class="space-y-4" method="POST" action="{{ route('expenses.update', $expense->id) }}" enctype="multipart/form-data">
+            <form class="space-y-4" id="account-form"  method="POST" action="{{ route('expenses.update', $expense->id) }}" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
 
@@ -43,9 +43,9 @@
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div>
                         <label class="text-sm font-semibold text-slate-700">Amount</label>
-                        <input type="number" name="amount" value="{{ old('amount', (float) $expense->amount) }}" step="0.01"
+                        <input name="amount" value="{{ old('amount', (float) $expense->amount) }}" step="0.01"
                             min="0.01"
-                            class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4"
+                            class="mt-2 amount-input w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4"
                             required>
                     </div>
 

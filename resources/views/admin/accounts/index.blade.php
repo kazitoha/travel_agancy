@@ -30,7 +30,7 @@
                 <div class="text-sm font-bold text-slate-900">Add account</div>
                 <div class="mt-1 text-xs text-slate-500">Current balance is auto-set from opening balance.</div>
 
-                <form class="mt-5 space-y-4" method="POST" action="{{ route('accounts.store') }}">
+                <form class="mt-5 space-y-4" id="account-form" method="POST" action="{{ route('accounts.store') }}" enctype="multipart/form-data">
                     @csrf
                     <div>
                         <label class="text-sm font-semibold text-slate-700">Account name</label>
@@ -55,9 +55,9 @@
 
                     <div>
                         <label class="text-sm font-semibold text-slate-700">Opening balance</label>
-                        <input type="number" name="opening_balance" value="{{ old('opening_balance', 0) }}" step="0.01"
+                        <input  name="opening_balance"  value="{{ old('opening_balance', 0) }}" step="0.01"
                             min="0"
-                            class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4"
+                            class="mt-2 w-full amount-input rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4"
                             required>
                     </div>
 
@@ -69,6 +69,12 @@
                             <option value="active" @selected(old('status', 'active') === 'active')>Active</option>
                             <option value="inactive" @selected(old('status') === 'inactive')>Inactive</option>
                         </select>
+                    </div>
+
+                    <div>
+                        <label class="text-sm font-semibold text-slate-700">Logo (optional)</label>
+                        <input type="file" name="logo" accept="image/*"
+                            class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4">
                     </div>
 
                     <button type="submit"
@@ -91,6 +97,7 @@
                         <table class="min-w-full text-sm">
                             <thead class="bg-white">
                                 <tr class="text-left text-xs uppercase tracking-wide text-slate-400">
+                                    <th class="px-4 py-3">Logo</th>
                                     <th class="px-4 py-3">Account name</th>
                                     <th class="px-4 py-3">Type</th>
                                     <th class="px-4 py-3">Opening</th>
@@ -103,6 +110,15 @@
                             <tbody class="divide-y divide-slate-100">
                                 @forelse ($accounts as $account)
                                     <tr class="bg-white hover:bg-slate-50">
+                                        <td class="px-4 py-3">
+                                            @if ($account->logo)
+                                                <img src="{{ asset('storage/' . $account->logo) }}"
+                                                    alt="{{ $account->name }} logo"
+                                                    class="h-8 w-8 rounded-full object-cover">
+                                            @else
+                                                <div class="h-8 w-8 rounded-full bg-slate-100"></div>
+                                            @endif
+                                        </td>
                                         <td class="px-4 py-3 font-semibold text-slate-900">{{ $account->name }}</td>
                                         <td class="px-4 py-3 text-slate-700">
                                             {{ $accountTypes[$account->type] ?? ucfirst(str_replace('_', ' ', $account->type)) }}
@@ -137,7 +153,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="7" class="px-6 py-10 text-center text-sm text-slate-500">No accounts yet.</td>
+                                        <td colspan="8" class="px-6 py-10 text-center text-sm text-slate-500">No accounts yet.</td>
                                     </tr>
                                 @endforelse
                             </tbody>

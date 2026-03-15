@@ -49,11 +49,19 @@
          </div>
 
          <!-- Right: actions -->
-         <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2">
              {{-- <button
                  class="hidden rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 md:inline-flex transition-all duration-200 hover:border-blue-300 active:scale-95">
                  Add
              </button> --}}
+
+             <button id="sidebarToggleBtn"
+                 class="hidden md:grid h-10 w-10 place-items-center rounded-full border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 active:scale-95"
+                 aria-pressed="false" title="Toggle sidebar">
+                 <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2">
+                     <path d="M4 6h16M4 12h10M4 18h16" />
+                 </svg>
+             </button>
 
              <button
                  class="hidden md:grid h-10 w-10 place-items-center rounded-full border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 active:scale-95"

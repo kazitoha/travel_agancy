@@ -22,7 +22,7 @@
         </div>
 
         <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <form class="space-y-4" method="POST" action="{{ route('accounts.update', $account->id) }}">
+            <form class="space-y-4" id="account-form" method="POST" action="{{ route('accounts.update', $account->id) }}" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
 
@@ -50,9 +50,9 @@
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div>
                         <label class="text-sm font-semibold text-slate-700">Opening balance</label>
-                        <input type="number" name="opening_balance"
+                        <input  name="opening_balance"
                             value="{{ old('opening_balance', (float) $account->opening_balance) }}" step="0.01" min="0"
-                            class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4"
+                            class="mt-2 w-full amount-input rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4"
                             required>
                     </div>
                     <div>
@@ -71,6 +71,20 @@
                         <option value="active" @selected(old('status', $account->status) === 'active')>Active</option>
                         <option value="inactive" @selected(old('status', $account->status) === 'inactive')>Inactive</option>
                     </select>
+                </div>
+
+                <div>
+                    <label class="text-sm font-semibold text-slate-700">Logo (optional)</label>
+                    <div class="mt-2 flex items-center gap-4">
+                        @if ($account->logo)
+                            <img src="{{ asset('storage/' . $account->logo) }}" alt="{{ $account->name }} logo"
+                                class="h-12 w-12 rounded-full object-cover">
+                        @else
+                            <div class="h-12 w-12 rounded-full bg-slate-100"></div>
+                        @endif
+                        <input type="file" name="logo" accept="image/*"
+                            class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4">
+                    </div>
                 </div>
 
                 <div class="flex items-center justify-end gap-2">

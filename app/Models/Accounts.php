@@ -20,6 +20,7 @@ class Accounts extends Model
         'opening_balance',
         'current_balance',
         'status',
+        'logo',
     ];
 
     protected function casts(): array

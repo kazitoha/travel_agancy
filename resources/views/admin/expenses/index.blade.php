@@ -30,27 +30,27 @@
                 <div class="text-sm font-bold text-slate-900">Add expense</div>
                 <div class="mt-1 text-xs text-slate-500">Account is required and must be active.</div>
 
-                <form class="mt-5 space-y-4" method="POST" action="{{ route('expenses.store') }}" enctype="multipart/form-data">
+                <form class="mt-5 space-y-4" id="account-form"  method="POST" action="{{ route('expenses.store') }}" enctype="multipart/form-data">
                     @csrf
 
                     <div>
-                        <label class="text-sm font-semibold text-slate-700">Account</label>
-                        <select name="account_id"
-                            class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4"
-                            required>
-                            <option value="">Select account</option>
-                            @foreach ($accounts as $account)
-                                <option value="{{ $account->id }}" @selected((string) old('account_id') === (string) $account->id)>
-                                    {{ $account->name }} ({{ $account->type }}) - {{ number_format((float) $account->current_balance, 2) }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
+    <label class="text-sm font-semibold text-slate-700">Account</label>
+    <select name="account_id"
+            class="searchable-select mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4"
+            required>
+        <option value="">Select account</option>
+        @foreach ($accounts as $account)
+            <option value="{{ $account->id }}" @selected((string) old('account_id') === (string) $account->id)>
+                {{ $account->name }} ({{ $account->type }}) - {{ number_format((float) $account->current_balance, 2) }}
+            </option>
+        @endforeach
+    </select>
+</div>
 
                     <div>
                         <label class="text-sm font-semibold text-slate-700">Amount</label>
-                        <input type="number" name="amount" value="{{ old('amount') }}" step="0.01" min="0.01"
-                            class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4"
+                        <input  name="amount" value="{{ old('amount') }}" step="0.01" min="0.01"
+                            class="mt-2 w-full amount-input rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4"
                             required>
                     </div>
 
@@ -156,4 +156,19 @@
             </div>
         </div>
     </div>
+    <script>document.addEventListener('DOMContentLoaded', function() {
+    const elements = document.querySelectorAll('.searchable-select');
+    
+    elements.forEach(el => {
+        new Choices(el, {
+            searchEnabled: true,
+            itemSelectText: '',
+            shouldSort: false,
+            classNames: {
+                containerOuter: 'choices mt-2',
+                containerInner: 'rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:ring-4 focus:ring-blue-200',
+            }
+        });
+    });
+});</script>
 @endsection

@@ -15,6 +15,7 @@ class TicketSales extends Model
 
     protected $fillable = [
         'reference_id',
+        'flight_date',
         'purchase_id',
         'customer_id',
         'account_id',
@@ -28,6 +29,7 @@ class TicketSales extends Model
     protected function casts(): array
     {
         return [
+            'flight_date' => 'date',
             'issue_date' => 'date',
             'sell_price' => 'decimal:2',
             'paid' => 'decimal:2',

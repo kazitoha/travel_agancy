@@ -22,7 +22,7 @@
         </div>
 
         <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <form class="space-y-4" method="POST" action="{{ route('ticket_purchases.update', $ticketPurchase->id) }}">
+            <form class="space-y-4" id="account-form"  method="POST" action="{{ route('ticket_purchases.update', $ticketPurchase->id) }}">
                 @csrf
                 @method('PUT')
 
@@ -89,17 +89,17 @@
 
                 <div>
                     <label class="text-sm font-semibold text-slate-700">Net fare</label>
-                    <input type="number" name="net_fare" step="0.01" min="0"
+                    <input  name="net_fare" step="0.01" min="0"
                         value="{{ old('net_fare', $ticketPurchase->net_fare) }}"
-                        class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4"
+                        class="mt-2 w-full amount-input rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4"
                         required>
                 </div>
 
                 <div>
                     <label class="text-sm font-semibold text-slate-700">Paid</label>
-                    <input type="number" name="paid_amount" step="0.01" min="0"
+                    <input  name="paid_amount" step="0.01" min="0"
                         value="{{ old('paid_amount', $ticketPurchase->paid_amount) }}"
-                        class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4">
+                        class="mt-2 w-full amount-input rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4">
                 </div>
 
              

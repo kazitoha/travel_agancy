@@ -22,7 +22,7 @@
         </div>
 
         <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <form class="space-y-4" method="POST" action="{{ route('ticket_sales.update', $ticketSale->id) }}">
+            <form class="space-y-4" id="account-form"  method="POST" action="{{ route('ticket_sales.update', $ticketSale->id) }}">
                 @csrf
                 @method('PUT')
 
@@ -92,20 +92,26 @@
 
                 <div>
                     <label class="text-sm font-semibold text-slate-700">Sell price</label>
-                    <input type="number" name="sell_price" step="0.01" min="0"
+                    <input  name="sell_price" step="0.01" min="0"
                         value="{{ old('sell_price', $ticketSale->sell_price) }}"
-                        class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4"
+                        class="mt-2 w-full amount-input rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4"
                         required>
                 </div>
 
                 <div>
                     <label class="text-sm font-semibold text-slate-700">Paid</label>
-                    <input type="number" name="paid" step="0.01" min="0"
+                    <input  name="paid" step="0.01" min="0"
                         value="{{ old('paid', $ticketSale->paid) }}"
+                        class="mt-2 w-full amount-input rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4">
+                </div>
+
+                <div>
+                    <label class="text-sm font-semibold text-slate-700">Flight date</label>
+                    <input type="date" name="flight_date"
+                        value="{{ old('flight_date', optional($ticketSale->flight_date)->format('Y-m-d')) }}"
                         class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4">
                 </div>
 
-            
                 <div>
                     <label class="text-sm font-semibold text-slate-700">Issue date</label>
                     <input type="date" name="issue_date"

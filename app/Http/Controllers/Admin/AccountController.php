@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Accounts;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class AccountController extends Controller
@@ -37,7 +38,13 @@ class AccountController extends Controller
             'type' => ['required', 'in:' . implode(',', array_keys(self::ACCOUNT_TYPES))],
             'opening_balance' => ['required', 'numeric', 'min:0'],
             'status' => ['required', 'in:active,inactive'],
+            'logo' => ['nullable', 'image', 'max:2048'],
         ]);
+
+        $logoPath = null;
+        if ($request->hasFile('logo')) {
+            $logoPath = $request->file('logo')->store('account-logos', 'public');
+        }
 
         Accounts::create([
             'user_id' => $request->user()->id,
@@ -46,6 +53,7 @@ class AccountController extends Controller
             'opening_balance' => $validated['opening_balance'],
             'current_balance' => $validated['opening_balance'],
             'status' => $validated['status'],
+            'logo' => $logoPath,
         ]);
 
         return redirect()
@@ -72,11 +80,20 @@ class AccountController extends Controller
             'type' => ['required', 'in:' . implode(',', array_keys(self::ACCOUNT_TYPES))],
             'opening_balance' => ['required', 'numeric', 'min:0'],
             'status' => ['required', 'in:active,inactive'],
+            'logo' => ['nullable', 'image', 'max:2048'],
         ]);
 
         $previousOpening = (float) $account->opening_balance;
         $newOpening = (float) $validated['opening_balance'];
         $openingDelta = $newOpening - $previousOpening;
+
+        $logoPath = $account->logo;
+        if ($request->hasFile('logo')) {
+            if ($logoPath) {
+                Storage::disk('public')->delete($logoPath);
+            }
+            $logoPath = $request->file('logo')->store('account-logos', 'public');
+        }
 
         $account->update([
             'name' => $validated['name'],
@@ -84,6 +101,7 @@ class AccountController extends Controller
             'opening_balance' => $newOpening,
             'current_balance' => (float) $account->current_balance + $openingDelta,
             'status' => $validated['status'],
+            'logo' => $logoPath,
         ]);
 
         return redirect()
@@ -99,6 +117,10 @@ class AccountController extends Controller
             return redirect()
                 ->route('accounts.index')
                 ->with('error', 'This account has expenses and cannot be deleted.');
+        }
+
+        if ($account->logo) {
+            Storage::disk('public')->delete($account->logo);
         }
 
         $account->delete();

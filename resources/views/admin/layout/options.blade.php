@@ -174,22 +174,23 @@
 @endphp
 
 <!-- DESKTOP SIDEBAR (dynamic) -->
-<aside class="hidden w-72 shrink-0 border-r border-slate-200 bg-white md:flex md:flex-col">
+<aside id="adminSidebar"
+    class="hidden w-72 shrink-0 border-r border-slate-200 bg-white md:flex md:flex-col transition-all duration-200">
     <!-- Brand -->
     <div class="flex items-center gap-3 px-6 py-5">
         <div class="grid h-10 w-10 place-items-center rounded-xl bg-slate-900 text-white">TM</div>
-        <div class="leading-tight">
+        <div class="leading-tight sidebar-brand-text">
             <div class="text-sm font-semibold">Travel Agency</div>
             <div class="text-xs text-slate-500">Admin Panel</div>
         </div>
     </div>
 
     <div class="px-6 pb-4">
-        <div class="text-xs font-semibold tracking-widest text-slate-400">NAVIGATION</div>
+        <div class="text-xs font-semibold tracking-widest text-slate-400 sidebar-section-title">NAVIGATION</div>
     </div>
 
     <!-- Nav -->
-    <nav class="flex-1 space-y-1 px-4 pb-6">
+    <nav class="flex-1 space-y-1 px-4 pb-6 sidebar-nav">
         @foreach ($navItems as $item)
             @php
                 $hasChildren = !empty($item['children'] ?? []);
@@ -201,33 +202,33 @@
             @endphp
 
             @if (!$hasChildren)
-                <a href="{{ route($item['route']) }}" class="{{ $linkClass($active) }}">
+                <a href="{{ route($item['route']) }}" class="{{ $linkClass($active) }} sidebar-item">
                     <span
-                        class="grid h-9 w-9 place-items-center rounded-xl transition-all duration-200 {{ $iconBox($iconTheme, $active) }}">
+                        class="grid h-9 w-9 place-items-center rounded-xl transition-all duration-200 {{ $iconBox($iconTheme, $active) }} sidebar-icon">
                         {!! $iconSvg($item['icon']) !!}
                     </span>
-                    {{ $item['label'] }}
+                    <span class="sidebar-label">{{ $item['label'] }}</span>
                 </a>
             @else
                 <details class="group" {{ $open ? 'open' : '' }}>
-                    <summary class="{{ $summaryClass($active) }}">
+                    <summary class="{{ $summaryClass($active) }} sidebar-item">
                         <span class="flex items-center gap-3">
                             <span
-                                class="grid h-9 w-9 place-items-center rounded-xl {{ $iconBox($iconTheme, $active) }}">
+                                class="grid h-9 w-9 place-items-center rounded-xl {{ $iconBox($iconTheme, $active) }} sidebar-icon">
                                 {!! $iconSvg($item['icon']) !!}
                             </span>
-                            {{ $item['label'] }}
+                            <span class="sidebar-label">{{ $item['label'] }}</span>
                         </span>
 
                         <!-- Arrow Icon -->
-                        <svg class="h-4 w-4 text-slate-400 transition-transform duration-200 group-open:rotate-180"
+                        <svg class="h-4 w-4 text-slate-400 transition-transform duration-200 group-open:rotate-180 sidebar-chevron"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M6 9l6 6 6-6" />
                         </svg>
                     </summary>
 
                     <!-- Submenu -->
-                    <div class="mt-1 space-y-1 pl-12">
+                    <div class="mt-1 space-y-1 pl-12 sidebar-submenu">
                         @foreach ($item['children'] as $child)
                             @if ($user && !permissionExists($child['route']))
                                 @continue

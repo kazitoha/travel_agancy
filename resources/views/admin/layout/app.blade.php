@@ -11,6 +11,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.js"></script>
+    
     <style>
         html,
         body {
@@ -100,6 +103,33 @@
 
         button:active {
             transform: translateY(0);
+        }
+
+        /* Desktop sidebar collapse */
+        @media (min-width: 768px) {
+            .sidebar-collapsed #adminSidebar {
+                width: 5rem;
+            }
+
+            .sidebar-collapsed #adminSidebar .sidebar-brand-text,
+            .sidebar-collapsed #adminSidebar .sidebar-label,
+            .sidebar-collapsed #adminSidebar .sidebar-section-title,
+            .sidebar-collapsed #adminSidebar .sidebar-chevron {
+                display: none;
+            }
+
+            .sidebar-collapsed #adminSidebar .sidebar-nav {
+                padding-left: 0.75rem;
+                padding-right: 0.75rem;
+            }
+
+            .sidebar-collapsed #adminSidebar .sidebar-item {
+                justify-content: center;
+            }
+
+            .sidebar-collapsed #adminSidebar .sidebar-submenu {
+                display: none;
+            }
         }
     </style>
 </head>
@@ -209,6 +239,32 @@
             if (e.key === "Escape") closeDrawer();
         });
 
+        // -------- Desktop sidebar toggle --------
+        const sidebarToggleBtn = document.getElementById("sidebarToggleBtn");
+        const sidebarStorageKey = "adminSidebarCollapsed";
+
+        function setSidebarCollapsed(isCollapsed) {
+            document.body.classList.toggle("sidebar-collapsed", isCollapsed);
+            sidebarToggleBtn?.setAttribute("aria-pressed", isCollapsed ? "true" : "false");
+            try {
+                localStorage.setItem(sidebarStorageKey, isCollapsed ? "1" : "0");
+            } catch (e) {
+                // ignore storage failures
+            }
+        }
+
+        try {
+            const saved = localStorage.getItem(sidebarStorageKey);
+            if (saved === "1") setSidebarCollapsed(true);
+        } catch (e) {
+            // ignore storage failures
+        }
+
+        sidebarToggleBtn?.addEventListener("click", () => {
+            const isCollapsed = document.body.classList.contains("sidebar-collapsed");
+            setSidebarCollapsed(!isCollapsed);
+        });
+
         // -------- Active Navigation Link --------
         function updateActiveNavLink() {
             const currentPath = window.location.pathname;
@@ -288,6 +344,55 @@
             }
         });
     </script>
+ <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('account-form');
+    const amountInputs = document.querySelectorAll('.amount-input');
+
+    // --- FUNCTION TO APPLY FORMATTING ---
+    function formatValue(input) {
+        let cursorPosition = input.selectionStart;
+        let originalLength = input.value.length;
+
+        let rawValue = input.value.replace(/,/g, '');
+
+        if (!isNaN(rawValue) && rawValue !== "") {
+            let parts = rawValue.split('.');
+            // Format thousand separator
+            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            
+            let formattedValue = parts.join('.');
+            input.value = formattedValue;
+
+            // Restore cursor (only if element is focused)
+            if (document.activeElement === input) {
+                let newLength = formattedValue.length;
+                input.setSelectionRange(
+                    cursorPosition + (newLength - originalLength), 
+                    cursorPosition + (newLength - originalLength)
+                );
+            }
+        }
+    }
+
+    // --- 1. RUN ON LOAD (For Edit Page) ---
+    amountInputs.forEach(input => formatValue(input));
+
+    // --- 2. RUN ON INPUT (While Typing) ---
+    amountInputs.forEach(input => {
+        input.addEventListener('input', () => formatValue(input));
+    });
+
+    // --- 3. CLEANUP ON SUBMIT (For Laravel Validation) ---
+    if (form) {
+        form.addEventListener('submit', function() {
+            amountInputs.forEach(input => {
+                input.value = input.value.replace(/,/g, '');
+            });
+        });
+    }
+});
+</script>
 </body>
 
 </html>

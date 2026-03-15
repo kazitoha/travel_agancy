@@ -29,7 +29,7 @@
             <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm lg:col-span-1">
                 <div class="text-sm font-bold text-slate-900">Add ticket sale</div>
 
-                <form class="mt-5 space-y-4" method="POST" action="{{ route('ticket_sales.store') }}">
+                <form class="mt-5 space-y-4" id="account-form"  method="POST" action="{{ route('ticket_sales.store') }}">
                     @csrf
 
                     <div>
@@ -98,18 +98,22 @@
 
                     <div>
                         <label class="text-sm font-semibold text-slate-700">Sell price</label>
-                        <input type="number" name="sell_price" step="0.01" min="0" value="{{ old('sell_price', 0) }}"
-                            class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4"
-                            required>
+                        <input  name="sell_price" step="0.01" min="0" value="{{ old('sell_price', 0) }}"
+                            class="mt-2 w-full amount-input rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4"
+                            required >
                     </div>
 
                     <div>
                         <label class="text-sm font-semibold text-slate-700">Paid</label>
-                        <input type="number" name="paid" step="0.01" min="0" value="{{ old('paid', 0) }}"
-                            class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4">
+                        <input  name="paid" step="0.01" min="0" value="{{ old('paid', 0) }}"
+                            class="mt-2 w-full amount-input rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4">
                     </div>
 
-                  
+                    <div>
+                        <label class="text-sm font-semibold text-slate-700">Flight date</label>
+                        <input type="date" name="flight_date" value="{{ old('flight_date') }}"
+                            class="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-blue-200 focus:border-blue-300 focus:ring-4">
+                    </div>
 
                     <div>
                         <label class="text-sm font-semibold text-slate-700">Issue date</label>
@@ -139,6 +143,7 @@
                                     <th class="px-4 py-3">Sell price</th>
                                     <th class="px-4 py-3">Paid</th>
                                     <th class="px-4 py-3">Due</th>
+                                    <th class="px-4 py-3">Flight date</th>
                                     <th class="px-4 py-3">Issue date</th>
                                     <th class="px-4 py-3 text-right">Actions</th>
                                 </tr>
@@ -168,6 +173,9 @@
                                             {{ number_format((float) $sale->due, 2) }}
                                         </td>
                                         <td class="px-4 py-3 text-slate-700">
+                                            {{ $sale->flight_date?->format('M j, Y') ?? '—' }}
+                                        </td>
+                                        <td class="px-4 py-3 text-slate-700">
                                             {{ $sale->issue_date?->format('M j, Y') ?? '—' }}
                                         </td>
                                         <td class="px-4 py-3">
@@ -194,7 +202,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="9" class="px-6 py-10 text-center text-sm text-slate-500">No ticket sales found.</td>
+                                        <td colspan="10" class="px-6 py-10 text-center text-sm text-slate-500">No ticket sales found.</td>
                                     </tr>
                                 @endforelse
                             </tbody>

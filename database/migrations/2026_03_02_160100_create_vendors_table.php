@@ -16,9 +16,9 @@ return new class extends Migration
         Schema::create('vendors', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('email');
-            $table->string('mobile', 30);
-            $table->text('address');
+            $table->string('email')->nullable();
+            $table->string('mobile', 30)->nullable();
+            $table->text('address')->nullable();
             $table->timestamps();
             $table->foreignIdFor(Companies::class, 'company_id')->constrained('companies')->cascadeOnDelete();
 

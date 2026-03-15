@@ -60,7 +60,8 @@
 
         <!-- Stats Cards -->
         <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            <div class="rounded-3xl border border-emerald-100 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+            <a href="{{ route('ticket_sales.index') }}"
+                class="group block rounded-3xl border border-emerald-100 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-emerald-200">
                 <div class="flex items-start justify-between">
                     <div>
                         <p class="text-sm font-semibold text-slate-500">Total Income</p>
@@ -77,9 +78,11 @@
                     </div>
                 </div>
                 <p class="mt-3 text-xs text-slate-400">All recorded income based on current filters.</p>
-            </div>
+                <p class="mt-2 text-xs font-semibold text-emerald-600">View income details</p>
+            </a>
 
-            <div class="rounded-3xl border border-rose-100 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+            <a href="{{ route('expenses.index') }}"
+                class="group block rounded-3xl border border-rose-100 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-rose-200">
                 <div class="flex items-start justify-between">
                     <div>
                         <p class="text-sm font-semibold text-slate-500">Total Expense</p>
@@ -96,7 +99,8 @@
                     </div>
                 </div>
                 <p class="mt-3 text-xs text-slate-400">All tracked expenses based on current filters.</p>
-            </div>
+                <p class="mt-2 text-xs font-semibold text-rose-600">View expense details</p>
+            </a>
 
             <div class="rounded-3xl border border-blue-100 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md md:col-span-2 xl:col-span-1">
                 <div class="flex items-start justify-between">
