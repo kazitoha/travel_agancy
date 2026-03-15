@@ -27,19 +27,46 @@ class TicketPurchaseController extends Controller
 
         $customers = Customers::orderBy('name')->get();
 
-        $ticketPurchases = TicketPurchases::with([
+        $dateType = (string) $request->query('date_type', 'flight_date');
+        if (!in_array($dateType, ['flight_date', 'issue_date'], true)) {
+            $dateType = 'flight_date';
+        }
+
+        $ticketPurchasesQuery = TicketPurchases::with([
             'vendor:id,name',
             'customer:id,name',
             'account:id,name',
         ])
-            ->latest()
-            ->get();
+            ->latest();
+
+        if ($request->filled('vendor_id')) {
+            $ticketPurchasesQuery->where('vendor_id', $request->query('vendor_id'));
+        }
+
+        if ($request->filled('customer_id')) {
+            $ticketPurchasesQuery->where('customer_id', $request->query('customer_id'));
+        }
+
+        if ($request->filled('account_id')) {
+            $ticketPurchasesQuery->where('account_id', $request->query('account_id'));
+        }
+
+        if ($request->filled('date_from')) {
+            $ticketPurchasesQuery->whereDate($dateType, '>=', $request->query('date_from'));
+        }
+
+        if ($request->filled('date_to')) {
+            $ticketPurchasesQuery->whereDate($dateType, '<=', $request->query('date_to'));
+        }
+
+        $ticketPurchases = $ticketPurchasesQuery->get();
 
         return view('admin.ticket_purchases.index', compact(
             'vendors',
             'accounts',
             'customers',
-            'ticketPurchases'
+            'ticketPurchases',
+            'dateType'
         ));
     }
 

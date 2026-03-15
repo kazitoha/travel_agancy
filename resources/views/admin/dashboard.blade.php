@@ -122,6 +122,97 @@
             </div>
         </div>
 
+        <!-- Recent Income & Expense -->
+        <div class="grid gap-6 lg:grid-cols-2">
+            <div class="overflow-hidden rounded-3xl border border-emerald-100 bg-white shadow-sm">
+                <div class="flex flex-col gap-2 border-b border-emerald-50 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900">Recent Income</h2>
+                        <p class="text-sm text-slate-500">Latest income transactions for the selected range.</p>
+                    </div>
+                    <a href="{{ route('ticket_sales.index') }}"
+                        class="text-xs font-semibold text-emerald-600 hover:underline">View all</a>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead class="bg-emerald-50/40">
+                            <tr class="text-left text-xs uppercase tracking-wide text-slate-500">
+                                <th class="px-6 py-4 font-semibold">Date</th>
+                                <th class="px-6 py-4 font-semibold">Account</th>
+                                <th class="px-6 py-4 text-right font-semibold">Paid</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            @forelse ($recentIncome ?? [] as $income)
+                                <tr class="transition hover:bg-emerald-50/40">
+                                    <td class="px-6 py-4 text-xs text-slate-600">
+                                        {{ $income->created_at?->format('M j, Y g:i A') }}
+                                    </td>
+                                    <td class="px-6 py-4 text-slate-700">
+                                        {{ $income->account?->name ?? 'N/A' }}
+                                        <span class="text-xs text-slate-400">({{ $income->account?->type ?? '-' }})</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-right font-semibold text-emerald-700">
+                                        {{ number_format((float) $income->paid, 2) }}
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="3" class="px-6 py-10 text-center text-sm text-slate-500">No income recorded.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="overflow-hidden rounded-3xl border border-rose-100 bg-white shadow-sm">
+                <div class="flex flex-col gap-2 border-b border-rose-50 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900">Recent Expenses</h2>
+                        <p class="text-sm text-slate-500">Latest expenses logged for the selected range.</p>
+                    </div>
+                    <a href="{{ route('expenses.index') }}"
+                        class="text-xs font-semibold text-rose-600 hover:underline">View all</a>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead class="bg-rose-50/40">
+                            <tr class="text-left text-xs uppercase tracking-wide text-slate-500">
+                                <th class="px-6 py-4 font-semibold">Date</th>
+                                <th class="px-6 py-4 font-semibold">Account</th>
+                                <th class="px-6 py-4 font-semibold">Category</th>
+                                <th class="px-6 py-4 text-right font-semibold">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            @forelse ($recentExpenses ?? [] as $expense)
+                                <tr class="transition hover:bg-rose-50/40">
+                                    <td class="px-6 py-4 text-xs text-slate-600">
+                                        {{ $expense->spent_at?->format('M j, Y g:i A') }}
+                                    </td>
+                                    <td class="px-6 py-4 text-slate-700">
+                                        {{ $expense->account?->name ?? 'N/A' }}
+                                        <span class="text-xs text-slate-400">({{ $expense->account?->type ?? '-' }})</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-slate-700">{{ $expense->category }}</td>
+                                    <td class="px-6 py-4 text-right font-semibold text-rose-700">
+                                        -{{ number_format((float) $expense->amount, 2) }}
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="4" class="px-6 py-10 text-center text-sm text-slate-500">No expenses recorded.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
         <!-- Accounts Table -->
         <div class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
             <div class="flex flex-col gap-2 border-b border-slate-100 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">

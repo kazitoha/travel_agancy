@@ -59,6 +59,22 @@ class DashboardController extends Controller
         }
         $totalExpense = (float) $expenseQuery->sum('amount') + $purchasePaidTotal;
 
+        $recentIncomeQuery = TicketSalesPaymentHistory::query()
+            ->with(['account:id,name,type'])
+            ->orderByDesc('created_at');
+        if ($rangeStart) {
+            $recentIncomeQuery->whereBetween('created_at', [$rangeStart, $now]);
+        }
+        $recentIncome = $recentIncomeQuery->limit(6)->get();
+
+        $recentExpensesQuery = Expenses::query()
+            ->with(['account:id,name,type'])
+            ->orderByDesc('spent_at');
+        if ($rangeStart) {
+            $recentExpensesQuery->whereBetween('created_at', [$rangeStart, $now]);
+        }
+        $recentExpenses = $recentExpensesQuery->limit(6)->get();
+
         return view('admin.dashboard', [
             'totalIncome' => $totalIncome,
             'totalExpense' => $totalExpense,
@@ -66,6 +82,8 @@ class DashboardController extends Controller
             'accounts' => $accounts,
             'range' => $range,
             'scope' => $scope,
+            'recentIncome' => $recentIncome,
+            'recentExpenses' => $recentExpenses,
         ]);
     }
 }

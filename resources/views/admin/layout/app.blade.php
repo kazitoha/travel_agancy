@@ -1,6 +1,5 @@
 <!doctype html>
-<html lang="en">
-
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,159 +10,53 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
-<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.js"></script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+                    },
+                    keyframes: {
+                        'pulse-soft': {
+                            '0%, 100%': { opacity: '1' },
+                            '50%': { opacity: '.7' },
+                        }
+                    },
+                    animation: {
+                        'pulse-soft': 'pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                }
+            }
+        }
+    </script>
+
     <style>
-        html,
-        body {
-            font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial,
-                "Noto Sans", "Liberation Sans", sans-serif;
-        }
-
-        /* Smooth transitions */
-        * {
-            transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-        }
-
-        /* Disable transitions on transform/opacity for performance */
-        * {
-            transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
-        }
-
-        /* Smooth drawer animation */
-        #mobileDrawer {
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        #drawerOverlay {
-            transition: opacity 0.3s ease;
-        }
-
-        /* Smooth scroll behavior */
-        html {
-            scroll-behavior: smooth;
-        }
-
-        /* Loading pulse animation */
-        @keyframes pulse-soft {
-
-            0%,
-            100% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.7;
-            }
-        }
-
-        .animate-pulse-soft {
-            animation: pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-
-        /* Link hover animation */
-        a {
-            position: relative;
-        }
-
-        /* Dropdown smooth appearance */
-        #profileMenu,
-        #bottomProfileMenu {
-            transition: opacity 0.2s ease, transform 0.2s ease;
-            transform-origin: top right;
-        }
-
-        #profileMenu.hidden,
-        #bottomProfileMenu.hidden {
-            opacity: 0;
-            transform: scale(0.95);
-            pointer-events: none;
-        }
-
-        #profileMenu:not(.hidden),
-        #bottomProfileMenu:not(.hidden) {
-            opacity: 1;
-            transform: scale(1);
-        }
-
-        /* Input focus smooth */
-        input:focus {
-            transition: all 0.3s ease;
-        }
-
-        /* Button hover scale */
-        button {
-            transition: all 0.2s ease;
-        }
-
-        button:hover {
-            transform: translateY(-1px);
-        }
-
-        button:active {
-            transform: translateY(0);
-        }
-
-        /* Desktop sidebar collapse */
-        @media (min-width: 768px) {
-            .sidebar-collapsed #adminSidebar {
-                width: 5rem;
-            }
-
-            .sidebar-collapsed #adminSidebar .sidebar-brand-text,
-            .sidebar-collapsed #adminSidebar .sidebar-label,
-            .sidebar-collapsed #adminSidebar .sidebar-section-title,
-            .sidebar-collapsed #adminSidebar .sidebar-chevron {
-                display: none;
-            }
-
-            .sidebar-collapsed #adminSidebar .sidebar-nav {
-                padding-left: 0.75rem;
-                padding-right: 0.75rem;
-            }
-
-            .sidebar-collapsed #adminSidebar .sidebar-item {
-                justify-content: center;
-            }
-
-            .sidebar-collapsed #adminSidebar .sidebar-submenu {
-                display: none;
-            }
+        [x-cloak] {
+            display: none !important;
         }
     </style>
 </head>
 
-<body class="bg-slate-50 text-slate-900">
-
+<body class="min-h-screen bg-slate-50 font-sans text-slate-900">
     @include('admin.layout.mobile-menu')
 
     <div class="min-h-screen">
         <div class="flex min-h-screen">
-
             @include('admin.layout.options')
 
-            <!-- MAIN -->
             <div class="flex min-w-0 flex-1 flex-col">
-
                 @include('admin.layout.header')
 
-                <!-- CONTENT -->
-                <main class="flex-1 px-4 py-5 md:px-8 md:py-6 pb-24 md:pb-6">
-
-
-
-
-
-
-
+                <main id="mainContent" class="flex-1 px-4 py-5 pb-24 transition-opacity duration-200 md:px-8 md:py-6 md:pb-6">
                     @yield('admin-content')
 
-
-
-
-
-                    <!-- Footer -->
                     <div class="mt-8 pb-6 text-center text-xs text-slate-400">
                         © 2026 Travel Agency • Developed by Zentrik Technology Ltd.
                     </div>
@@ -172,15 +65,9 @@
         </div>
     </div>
 
-
     @include('admin.layout.mobile-buttom-bar')
 
-
-
-
     @stack('scripts')
-
-
 
     <script>
         // -------- Dynamic Clock --------
@@ -190,12 +77,14 @@
             if (!dateEl || !timeEl) return;
 
             const now = new Date();
+
             const dateFormatter = new Intl.DateTimeFormat('en-US', {
                 weekday: 'long',
                 month: 'long',
                 day: 'numeric',
                 year: 'numeric'
             });
+
             const timeFormatter = new Intl.DateTimeFormat('en-US', {
                 hour: '2-digit',
                 minute: '2-digit',
@@ -213,21 +102,27 @@
         // -------- Drawer --------
         const overlay = document.getElementById("drawerOverlay");
         const drawer = document.getElementById("mobileDrawer");
-        const openBtns = [document.getElementById("mobileMenuBtn"), document.getElementById("bottomMenuBtn")].filter(
-            Boolean);
+        const openBtns = [
+            document.getElementById("mobileMenuBtn"),
+            document.getElementById("bottomMenuBtn")
+        ].filter(Boolean);
         const closeBtn = document.getElementById("drawerClose");
 
         function openDrawer() {
-            overlay.classList.remove("hidden");
-            setTimeout(() => drawer.classList.remove("-translate-x-full"), 10);
-            drawer.setAttribute("aria-hidden", "false");
+            overlay?.classList.remove("hidden");
+            setTimeout(() => {
+                drawer?.classList.remove("-translate-x-full");
+            }, 10);
+            drawer?.setAttribute("aria-hidden", "false");
             document.body.classList.add("overflow-hidden");
         }
 
         function closeDrawer() {
-            drawer.classList.add("-translate-x-full");
-            setTimeout(() => overlay.classList.add("hidden"), 300);
-            drawer.setAttribute("aria-hidden", "true");
+            drawer?.classList.add("-translate-x-full");
+            setTimeout(() => {
+                overlay?.classList.add("hidden");
+            }, 300);
+            drawer?.setAttribute("aria-hidden", "true");
             document.body.classList.remove("overflow-hidden");
         }
 
@@ -242,23 +137,47 @@
         // -------- Desktop sidebar toggle --------
         const sidebarToggleBtn = document.getElementById("sidebarToggleBtn");
         const sidebarStorageKey = "adminSidebarCollapsed";
+        const adminSidebar = document.getElementById("adminSidebar");
 
         function setSidebarCollapsed(isCollapsed) {
             document.body.classList.toggle("sidebar-collapsed", isCollapsed);
+
+            if (adminSidebar) {
+                if (window.innerWidth >= 768) {
+                    adminSidebar.classList.toggle("md:w-20", isCollapsed);
+                    adminSidebar.classList.toggle("md:w-72", !isCollapsed);
+                }
+            }
+
+            document.querySelectorAll(".sidebar-brand-text, .sidebar-label, .sidebar-section-title, .sidebar-chevron")
+                .forEach(el => el.classList.toggle("hidden", isCollapsed));
+
+            document.querySelectorAll(".sidebar-submenu")
+                .forEach(el => el.classList.toggle("hidden", isCollapsed));
+
+            document.querySelectorAll(".sidebar-nav")
+                .forEach(el => {
+                    el.classList.toggle("px-3", !isCollapsed);
+                    el.classList.toggle("px-2", isCollapsed);
+                });
+
+            document.querySelectorAll(".sidebar-item")
+                .forEach(el => {
+                    el.classList.toggle("justify-center", isCollapsed);
+                    el.classList.toggle("justify-start", !isCollapsed);
+                });
+
             sidebarToggleBtn?.setAttribute("aria-pressed", isCollapsed ? "true" : "false");
+
             try {
                 localStorage.setItem(sidebarStorageKey, isCollapsed ? "1" : "0");
-            } catch (e) {
-                // ignore storage failures
-            }
+            } catch (e) {}
         }
 
         try {
             const saved = localStorage.getItem(sidebarStorageKey);
             if (saved === "1") setSidebarCollapsed(true);
-        } catch (e) {
-            // ignore storage failures
-        }
+        } catch (e) {}
 
         sidebarToggleBtn?.addEventListener("click", () => {
             const isCollapsed = document.body.classList.contains("sidebar-collapsed");
@@ -268,8 +187,10 @@
         // -------- Active Navigation Link --------
         function updateActiveNavLink() {
             const currentPath = window.location.pathname;
+
             document.querySelectorAll('a[href^="/"]').forEach(link => {
                 link.classList.remove('bg-blue-50', 'text-blue-600', 'border-blue-200');
+
                 if (link.getAttribute('href') === currentPath) {
                     link.classList.add('bg-blue-50', 'text-blue-600', 'border-blue-200');
                 }
@@ -282,6 +203,8 @@
         // -------- Top profile dropdown --------
         const profileBtn = document.getElementById("profileBtn");
         const profileMenu = document.getElementById("profileMenu");
+        const bottomProfileBtn = document.getElementById("bottomProfileBtn");
+        const bottomProfileMenu = document.getElementById("bottomProfileMenu");
 
         function closeProfileMenu() {
             profileMenu?.classList.add("hidden");
@@ -291,23 +214,20 @@
         profileBtn?.addEventListener("click", (e) => {
             e.stopPropagation();
             const isHidden = profileMenu?.classList.contains("hidden");
-            // close bottom menu if open
+
             if (bottomProfileMenu) bottomProfileMenu.classList.add("hidden");
+
             if (isHidden) {
                 profileMenu?.classList.remove("hidden");
-                profileBtn.setAttribute("aria-expanded", "true");
+                profileBtn?.setAttribute("aria-expanded", "true");
             } else {
                 closeProfileMenu();
             }
         });
 
         // -------- Bottom profile dropdown --------
-        const bottomProfileBtn = document.getElementById("bottomProfileBtn");
-        const bottomProfileMenu = document.getElementById("bottomProfileMenu");
-
         bottomProfileBtn?.addEventListener("click", (e) => {
             e.stopPropagation();
-            // close top menu if open
             closeProfileMenu();
             bottomProfileMenu?.classList.toggle("hidden");
         });
@@ -315,10 +235,9 @@
         // -------- Click outside to close menus --------
         document.addEventListener("click", () => {
             closeProfileMenu();
-            if (bottomProfileMenu) bottomProfileMenu.classList.add("hidden");
+            bottomProfileMenu?.classList.add("hidden");
         });
 
-        // prevent menu click from bubbling to document
         profileMenu?.addEventListener("click", (e) => e.stopPropagation());
         bottomProfileMenu?.addEventListener("click", (e) => e.stopPropagation());
         drawer?.addEventListener("click", (e) => e.stopPropagation());
@@ -326,73 +245,65 @@
         // -------- Smooth page transitions --------
         document.addEventListener('click', (e) => {
             const link = e.target.closest('a[href^="/"]');
+
             if (link && !e.metaKey && !e.ctrlKey) {
-                const mainContent = document.querySelector('main');
+                const mainContent = document.getElementById('mainContent');
                 if (mainContent) {
-                    mainContent.style.opacity = '0.7';
-                    mainContent.style.pointerEvents = 'none';
+                    mainContent.classList.add('opacity-70', 'pointer-events-none');
                 }
             }
         });
 
-        // Restore when page loads
         window.addEventListener('load', () => {
-            const mainContent = document.querySelector('main');
+            const mainContent = document.getElementById('mainContent');
             if (mainContent) {
-                mainContent.style.opacity = '1';
-                mainContent.style.pointerEvents = 'auto';
+                mainContent.classList.remove('opacity-70', 'pointer-events-none');
             }
         });
     </script>
- <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('account-form');
-    const amountInputs = document.querySelectorAll('.amount-input');
 
-    // --- FUNCTION TO APPLY FORMATTING ---
-    function formatValue(input) {
-        let cursorPosition = input.selectionStart;
-        let originalLength = input.value.length;
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('account-form');
+            const amountInputs = document.querySelectorAll('.amount-input');
 
-        let rawValue = input.value.replace(/,/g, '');
+            function formatValue(input) {
+                let cursorPosition = input.selectionStart;
+                let originalLength = input.value.length;
 
-        if (!isNaN(rawValue) && rawValue !== "") {
-            let parts = rawValue.split('.');
-            // Format thousand separator
-            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-            
-            let formattedValue = parts.join('.');
-            input.value = formattedValue;
+                let rawValue = input.value.replace(/,/g, '');
 
-            // Restore cursor (only if element is focused)
-            if (document.activeElement === input) {
-                let newLength = formattedValue.length;
-                input.setSelectionRange(
-                    cursorPosition + (newLength - originalLength), 
-                    cursorPosition + (newLength - originalLength)
-                );
+                if (!isNaN(rawValue) && rawValue !== "") {
+                    let parts = rawValue.split('.');
+                    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+                    let formattedValue = parts.join('.');
+                    input.value = formattedValue;
+
+                    if (document.activeElement === input) {
+                        let newLength = formattedValue.length;
+                        input.setSelectionRange(
+                            cursorPosition + (newLength - originalLength),
+                            cursorPosition + (newLength - originalLength)
+                        );
+                    }
+                }
             }
-        }
-    }
 
-    // --- 1. RUN ON LOAD (For Edit Page) ---
-    amountInputs.forEach(input => formatValue(input));
+            amountInputs.forEach(input => formatValue(input));
 
-    // --- 2. RUN ON INPUT (While Typing) ---
-    amountInputs.forEach(input => {
-        input.addEventListener('input', () => formatValue(input));
-    });
-
-    // --- 3. CLEANUP ON SUBMIT (For Laravel Validation) ---
-    if (form) {
-        form.addEventListener('submit', function() {
             amountInputs.forEach(input => {
-                input.value = input.value.replace(/,/g, '');
+                input.addEventListener('input', () => formatValue(input));
             });
-        });
-    }
-});
-</script>
-</body>
 
+            if (form) {
+                form.addEventListener('submit', function () {
+                    amountInputs.forEach(input => {
+                        input.value = input.value.replace(/,/g, '');
+                    });
+                });
+            }
+        });
+    </script>
+</body>
 </html>

@@ -38,14 +38,40 @@ class TicketSaleController extends Controller
             ->latest()
             ->get();
 
-        $ticketSales = TicketSales::with([
+        $dateType = (string) $request->query('date_type', 'issue_date');
+        if (!in_array($dateType, ['issue_date', 'flight_date'], true)) {
+            $dateType = 'issue_date';
+        }
+
+        $ticketSalesQuery = TicketSales::with([
             'purchase:id,sector,carrier,flight_date',
             'reference:id,company_name',
             'customer:id,name',
             'account:id,name',
         ])
-            ->latest()
-            ->get();
+            ->latest();
+
+        if ($request->filled('customer_id')) {
+            $ticketSalesQuery->where('customer_id', $request->query('customer_id'));
+        }
+
+        if ($request->filled('reference_id')) {
+            $ticketSalesQuery->where('reference_id', $request->query('reference_id'));
+        }
+
+        if ($request->filled('account_id')) {
+            $ticketSalesQuery->where('account_id', $request->query('account_id'));
+        }
+
+        if ($request->filled('date_from')) {
+            $ticketSalesQuery->whereDate($dateType, '>=', $request->query('date_from'));
+        }
+
+        if ($request->filled('date_to')) {
+            $ticketSalesQuery->whereDate($dateType, '<=', $request->query('date_to'));
+        }
+
+        $ticketSales = $ticketSalesQuery->get();
 
         return view('admin.ticket_sales.index', [
             'customers' => $customers,
@@ -53,6 +79,7 @@ class TicketSaleController extends Controller
             'accounts' => $accounts,
             'purchases' => $purchases,
             'ticketSales' => $ticketSales,
+            'dateType' => $dateType,
         ]);
     }
 
